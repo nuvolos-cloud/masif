@@ -23,19 +23,24 @@ def computeAPBS(vertices, pdb_file, tmp_file_base):
     pdbname = pdb_file.split("/")[-1]
     args = [
         pdb2pqr_bin,
-        "--ff=parse",
+        "--ff=PARSE",
         "--whitespace",
         "--noopt",
         "--apbs-input",
+        filename_base + ".in",
         pdbname,
-        filename_base,
+        filename_base +".pqr",
     ]
+    print(f"### Running pdb2pqr_bin: {args}")
     p2 = Popen(args, stdout=PIPE, stderr=PIPE, cwd=directory)
     stdout, stderr = p2.communicate()
+    print(f"### Running pdb2pqr_bin done")
 
     args = [apbs_bin, filename_base + ".in"]
+    print(f"### Running apbs: {args}")
     p2 = Popen(args, stdout=PIPE, stderr=PIPE, cwd=directory)
     stdout, stderr = p2.communicate()
+    print(f"### Running apbs done")
 
     vertfile = open(directory + "/" + filename_base + ".csv", "w")
     for vert in vertices:
@@ -45,24 +50,29 @@ def computeAPBS(vertices, pdb_file, tmp_file_base):
     args = [
         multivalue_bin,
         filename_base + ".csv",
-        filename_base + ".dx",
+        filename_base + ".pqr.dx",
         filename_base + "_out.csv",
     ]
+    print(f"### Running multivalue: {args}")
     p2 = Popen(args, stdout=PIPE, stderr=PIPE, cwd=directory)
     stdout, stderr = p2.communicate()
+    print(f"### Running multivalue done")
 
     # Read the charge file
+    print(f"### Reading the charge file: {args}")
     chargefile = open(tmp_file_base + "_out.csv")
     charges = numpy.array([0.0] * len(vertices))
     for ix, line in enumerate(chargefile.readlines()):
         charges[ix] = float(line.split(",")[3])
+    chargefile.close()
+    print(f"### Chargefile closed.")
 
     remove_fn = os.path.join(directory, filename_base)
-    os.remove(remove_fn)
+    #os.remove(remove_fn, )
     os.remove(remove_fn+'.csv')
-    os.remove(remove_fn+'.dx')
+    os.remove(remove_fn+'.pqr.dx')
     os.remove(remove_fn+'.in')
-    os.remove(remove_fn+'-input.p')
+    #os.remove(remove_fn+'-input.p')
     os.remove(remove_fn+'_out.csv')
 
     return charges
