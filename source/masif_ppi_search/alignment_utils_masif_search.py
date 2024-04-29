@@ -1,9 +1,10 @@
-import numpy as np 
+import numpy as np
 from IPython.core.debugger import set_trace
 import copy
 from Bio.PDB import *
 import os
 from geometry.open3d_import import *
+
 
 def compute_nn_score(
     target_ckdtree,
@@ -11,14 +12,15 @@ def compute_nn_score(
     source_patch,
     target_descs,
     source_patch_descs,
-    nn_model):
-    # Compute the score of the neural network. 
-    # target_ckdtree: KD-tree of the target patch point cloud. 
-    # target_patch: Patch of the target. 
+    nn_model,
+):
+    # Compute the score of the neural network.
+    # target_ckdtree: KD-tree of the target patch point cloud.
+    # target_patch: Patch of the target.
     # source_patch: Patch of the source.
     # target_descs: Fingerprint descriptors of the target
     # source_patch_descs:  Fingerprint descriptors of the source.
-    # Returns: the score of the alignment. 
+    # Returns: the score of the alignment.
 
     # Neural network max size is 200. Those bigger must be trimmed.
     npoints = np.asarray(source_patch.points).shape[0]
@@ -27,28 +29,36 @@ def compute_nn_score(
     # Compute nn scores
     # Compute all points correspondences and distances for nn
     nn_dists, nn_inds = target_ckdtree.query(source_patch.points)
-    desc_dists = np.linalg.norm(source_patch_descs.data.T-target_descs.data.T[nn_inds],axis=1)
-    normal_dp = np.diag(np.dot(np.asarray(source_patch.normals),np.asarray(target_patch.normals)[nn_inds].T))
-    features = np.zeros((npoints,n_features))
-    nn_dists[nn_dists<0.5] = 0.5
-    features[:npoints,0] = 1.0/nn_dists
-    features[:npoints,1] = 1.0/desc_dists
-    features[:npoints,2] = normal_dp
+    desc_dists = np.linalg.norm(
+        source_patch_descs.data.T - target_descs.data.T[nn_inds], axis=1
+    )
+    normal_dp = np.diag(
+        np.dot(
+            np.asarray(source_patch.normals),
+            np.asarray(target_patch.normals)[nn_inds].T,
+        )
+    )
+    features = np.zeros((npoints, n_features))
+    nn_dists[nn_dists < 0.5] = 0.5
+    features[:npoints, 0] = 1.0 / nn_dists
+    features[:npoints, 1] = 1.0 / desc_dists
+    features[:npoints, 2] = normal_dp
 
-    features_trimmed = np.zeros((1,max_npoints,n_features))
-    if npoints>max_npoints:
-        selected_rows = np.random.choice(features.shape[0],max_npoints,replace=False)
-        features_trimmed[0,:,:] = features[selected_rows]
+    features_trimmed = np.zeros((1, max_npoints, n_features))
+    if npoints > max_npoints:
+        selected_rows = np.random.choice(features.shape[0], max_npoints, replace=False)
+        features_trimmed[0, :, :] = features[selected_rows]
     else:
-        features_trimmed[0,:features.shape[0],:] = features
+        features_trimmed[0, : features.shape[0], :] = features
 
-    # Evaluate patch with neural network. 
+    # Evaluate patch with neural network.
     pred = nn_model.eval(features_trimmed)
     return pred[0][1]
 
+
 def rand_rotation_matrix(deflection=1.0, randnums=None):
     """
-    Creates a random rotation matrix. used to randomize initial pose. 
+    Creates a random rotation matrix. used to randomize initial pose.
 
     deflection: the magnitude of the rotation. For 0, no rotation; for 1, competely random
     rotation. Small deflection => small perturbation.
@@ -87,8 +97,8 @@ def rand_rotation_matrix(deflection=1.0, randnums=None):
 
 def get_center_and_random_rotate(pcd):
     """
-        Get the center of a point cloud and randomly rotate it.
-        pcd: the point cloud.
+    Get the center of a point cloud and randomly rotate it.
+    pcd: the point cloud.
     """
     pts = pcd.points
     mean_pt = np.mean(pts, axis=0)
@@ -105,19 +115,19 @@ def get_patch_geo(
     pcd, patch_coords, center, descriptors, outward_shift=0.25, flip=False
 ):
     """
-        Get a patch based on geodesic distances. 
-        pcd: the point cloud.
-        patch_coords: the geodesic distances.
-        center: the index of the center of the patch
-        descriptors: the descriptors for every point in the original surface.
-        outward_shift: expand the surface by a float value (for better alignment)
-        flip: invert the surface?
+    Get a patch based on geodesic distances.
+    pcd: the point cloud.
+    patch_coords: the geodesic distances.
+    center: the index of the center of the patch
+    descriptors: the descriptors for every point in the original surface.
+    outward_shift: expand the surface by a float value (for better alignment)
+    flip: invert the surface?
     """
 
     idx = patch_coords[center]
     pts = np.asarray(pcd.points)[idx, :]
     nrmls = np.asarray(pcd.normals)[idx, :]
-    # Expand the surface in the direction of the normals. 
+    # Expand the surface in the direction of the normals.
     pts = pts + outward_shift * nrmls
     if flip:
         nrmls = -np.asarray(pcd.normals)[idx, :]
@@ -131,20 +141,20 @@ def get_patch_geo(
 
 
 def multidock(
-    source_pcd, # the candidate 'decoy' patches
-    source_patch_coords, # The geodesic coordinates of the decoy patches
-    source_descs, # The source descriptors
-    cand_pts, # The central vertex of the candidate patches.
-    target_pcd, # The target patch's point cloud
-    target_descs, # The descriptors for the target patch
-    target_ckdtree, # A kd-tree for the target patch for fast searches. 
-    nn_model, # The neural network model
-    ransac_radius=1.0, # The radius fro RANSAC inliers.
+    source_pcd,  # the candidate 'decoy' patches
+    source_patch_coords,  # The geodesic coordinates of the decoy patches
+    source_descs,  # The source descriptors
+    cand_pts,  # The central vertex of the candidate patches.
+    target_pcd,  # The target patch's point cloud
+    target_descs,  # The descriptors for the target patch
+    target_ckdtree,  # A kd-tree for the target patch for fast searches.
+    nn_model,  # The neural network model
+    ransac_radius=1.0,  # The radius fro RANSAC inliers.
     ransac_iter=2000,
-    use_icp=True
+    use_icp=True,
 ):
     """
-    Multi-docking protocol: Here is where the alignment is actually made. 
+    Multi-docking protocol: Here is where the alignment is actually made.
     This method aligns each of the K prematched decoy patches to the target using tehe
     RANSAC algorithm followed by icp
     """
@@ -174,12 +184,16 @@ def multidock(
                 CorrespondenceCheckerBasedOnDistance(1.5),
                 CorrespondenceCheckerBasedOnNormal(np.pi / 2),
             ],
-            RANSACConvergenceCriteria(ransac_iter, 500)
+            RANSACConvergenceCriteria(ransac_iter, 500),
         )
         # Optimize the alignment using RANSAC.
         if use_icp:
-            result = registration_icp(source_patch, target_pcd, 
-            1.0, result.transformation, TransformationEstimationPointToPlane(),
+            result = registration_icp(
+                source_patch,
+                target_pcd,
+                1.0,
+                result.transformation,
+                TransformationEstimationPointToPlane(),
             )
 
         source_patch.transform(result.transformation)
@@ -189,11 +203,11 @@ def multidock(
         # Compute the neural network score for each alignment.
         source_scores = compute_nn_score(
             target_ckdtree,
-            target_pcd, 
+            target_pcd,
             source_patch,
             target_descs,
             source_patch_descs,
-            nn_model
+            nn_model,
         )
         all_source_scores.append(source_scores)
 
@@ -201,16 +215,16 @@ def multidock(
 
 
 def test_alignments(
-    transformation, # the 4D transformation matrix 
-    random_transformation, # The random transformation matrix used before.
-    source_structure, # The source (decoy) binder structure in a Biopython object 
-    target_ca_pcd_tree, # The target c-alphas in an Open3D point cloud tree format.
-    target_pcd_tree, # The target atoms in an Open 3D point cloud tree format.
-    radius=2.0, # The radius for clashes (unused) 
-    interface_dist=10.0, # The interface cutoff to define the interface.
+    transformation,  # the 4D transformation matrix
+    random_transformation,  # The random transformation matrix used before.
+    source_structure,  # The source (decoy) binder structure in a Biopython object
+    target_ca_pcd_tree,  # The target c-alphas in an Open3D point cloud tree format.
+    target_pcd_tree,  # The target atoms in an Open 3D point cloud tree format.
+    radius=2.0,  # The radius for clashes (unused)
+    interface_dist=10.0,  # The interface cutoff to define the interface.
 ):
     """
-    Verify the alignment against the ground truth. 
+    Verify the alignment against the ground truth.
     """
 
     structure_coords = np.array(
@@ -227,7 +241,7 @@ def test_alignments(
     structure_coord_pcd.transform(transformation)
 
     clashing = 0
-    # Compute clashes (unused now) 
+    # Compute clashes (unused now)
     for point in structure_coord_pcd.points:
         [k, idx, _] = target_pcd_tree.search_radius_vector_3d(point, radius)
         if k > 0:
@@ -264,7 +278,7 @@ def compute_desc_dist_score(
     target_pcd, source_pcd, corr, target_desc, source_desc, cutoff=2.0
 ):
     """
-        compute_desc_dist_score: a simple scoring based on fingerprints (unused currently in this protocol)
+    compute_desc_dist_score: a simple scoring based on fingerprints (unused currently in this protocol)
     """
     # Compute scores based on correspondences.
     if len(corr) < 1:
@@ -287,32 +301,30 @@ def compute_desc_dist_score(
     return np.array([scores_corr, inliers, scores_corr_mean, scores_corr_cube]).T
 
 
-
-
 def subsample_patch_coords(pdb, pid, precomp_dir, cv=None):
     """
-        subsample_patch_coords: Read the geodesic coordinates in an easy to access format.
-        pdb: the id of the protein pair in PDBID_CHAIN1_CHAIN2 format.
-        pid: 'p1' if you want to read CHAIN1, 'p2' if you want to read CHAIN2
-        cv: central vertex (list of patches to select; if None, select all)
+    subsample_patch_coords: Read the geodesic coordinates in an easy to access format.
+    pdb: the id of the protein pair in PDBID_CHAIN1_CHAIN2 format.
+    pid: 'p1' if you want to read CHAIN1, 'p2' if you want to read CHAIN2
+    cv: central vertex (list of patches to select; if None, select all)
     """
 
     if cv is None:
-        pc = np.load(os.path.join(precomp_dir, pdb, pid+'_list_indices.npy'))
+        pc = np.load(os.path.join(precomp_dir, pdb, pid + "_list_indices.npy"))
     else:
         pc = {}
-        coords = np.load(os.path.join(precomp_dir, pdb, pid+'_list_indices.npy'))[cv]
+        coords = np.load(os.path.join(precomp_dir, pdb, pid + "_list_indices.npy"))[cv]
         for iii, v in enumerate(cv):
             pc[v] = coords[iii]
 
-
     return pc
 
+
 def get_target_vix(pc, iface):
-    """ 
-        Get center of the patch on the target surface that has the highest mean iface score.
-        pc: patch coords
-        iface: a vector with interface scores for the target.
+    """
+    Get center of the patch on the target surface that has the highest mean iface score.
+    pc: patch coords
+    iface: a vector with interface scores for the target.
     """
     iface_patch_vals = []
     # Go through each patch.

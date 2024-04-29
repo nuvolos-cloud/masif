@@ -68,8 +68,7 @@ if not os.path.exists(params["model_dir"]):
     os.makedirs(params["model_dir"])
 else:
     # Load existing network.
-    print (f"### Reading pre-trained network from {params['model_dir']+'model'}")
-    learning_obj.saver.restore(learning_obj.session, params['model_dir']+'model')
+    print(f"### Reading pre-trained network from {params['model_dir']+'model'}")
+    learning_obj.saver.restore(learning_obj.session, params["model_dir"] + "model")
 
 train_masif_site(learning_obj, params)
-

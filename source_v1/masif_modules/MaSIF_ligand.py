@@ -303,4 +303,3 @@ class MaSIF_ligand:
                 init = tf.global_variables_initializer()
                 self.session.run(init)
                 self.count_number_parameters()
-

@@ -5,7 +5,7 @@ import numpy as np
 class MaSIF_ppi_search:
 
     """
-    The neural network model to classify two patches into binders or not binders. 
+    The neural network model to classify two patches into binders or not binders.
     """
 
     def count_number_parameters(self):
@@ -28,7 +28,9 @@ class MaSIF_ppi_search:
         return frobenius_norm
 
     def build_sparse_matrix_softmax(self, idx_non_zero_values, X, dense_shape_A):
-        A = tf.compat.v1.SparseTensorValue(idx_non_zero_values, tf.squeeze(X), dense_shape_A)
+        A = tf.compat.v1.SparseTensorValue(
+            idx_non_zero_values, tf.squeeze(X), dense_shape_A
+        )
         A = tf.sparse.reorder(A)  # n_edges x n_edges
         A = tf.sparse.softmax(A)
 
@@ -132,7 +134,9 @@ class MaSIF_ppi_search:
         epsilon = tf.constant(value=0.00001)
         logit = tf.nn.softmax([pos, neg])
         self.softmax_debug = logit
-        cross_entropy = -(tf.math.log(logit[1] + epsilon) - tf.math.log(logit[0] + epsilon))
+        cross_entropy = -(
+            tf.math.log(logit[1] + epsilon) - tf.math.log(logit[0] + epsilon)
+        )
         return cross_entropy
 
     # Data loss
@@ -267,7 +271,9 @@ class MaSIF_ppi_search:
                             self.n_thetas * self.n_rhos,
                             self.n_thetas * self.n_rhos,
                         ],
-                        initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"),
+                        initializer=tf.compat.v1.keras.initializers.VarianceScaling(
+                            scale=1.0, mode="fan_avg", distribution="uniform"
+                        ),
                     )
 
                     desc = self.inference(
@@ -293,9 +299,10 @@ class MaSIF_ppi_search:
 
                 # Refine global_desc with a FC layer.
                 self.global_desc = tf.keras.layers.Dense(
-                    self.n_thetas * self.n_rhos,
-                    activation=tf.identity
-                )(self.global_desc)  # batch_size, n_thetas * n_rhos
+                    self.n_thetas * self.n_rhos, activation=tf.identity
+                )(
+                    self.global_desc
+                )  # batch_size, n_thetas * n_rhos
 
                 # compute data loss
                 self.n_patches = tf.shape(self.global_desc)[0] // 4
@@ -306,7 +313,9 @@ class MaSIF_ppi_search:
                     learning_rate=learning_rate
                 ).minimize(self.data_loss)
 
-                self.var_grad = tf.gradients(self.data_loss, tf.compat.v1.trainable_variables())
+                self.var_grad = tf.gradients(
+                    self.data_loss, tf.compat.v1.trainable_variables()
+                )
                 # print self.var_grad
                 for k in range(len(self.var_grad)):
                     if self.var_grad[k] is None:
@@ -325,4 +334,3 @@ class MaSIF_ppi_search:
                 init = tf.compat.v1.global_variables_initializer()
                 self.session.run(init)
                 self.count_number_parameters()
-

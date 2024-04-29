@@ -34,4 +34,3 @@ for i in range(n_test_files):
                     stdout=fout,
                     stderr=ferr,
                 )
-

@@ -1,14 +1,16 @@
 import pymesh
 import numpy
+
 """
 read_ply.py: Read a ply file from disk using pymesh and load the attributes used by MaSIF. 
 Pablo Gainza - LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
 
+
 def read_ply(filename):
-    # Read a ply file from disk using pymesh and load the attributes used by MaSIF. 
-    # filename: the input ply file. 
+    # Read a ply file from disk using pymesh and load the attributes used by MaSIF.
+    # filename: the input ply file.
     # returns data as tuple.
     mesh = pymesh.load_mesh(filename)
 
@@ -50,4 +52,3 @@ def read_ply(filename):
         vertex_hbond,
         vertex_hphob,
     )
-

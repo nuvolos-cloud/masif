@@ -5,7 +5,7 @@ import numpy as np
 class MaSIF_ppi_search:
 
     """
-    The neural network model to classify two patches into binders or not binders. 
+    The neural network model to classify two patches into binders or not binders.
     """
 
     def count_number_parameters(self):
@@ -326,4 +326,3 @@ class MaSIF_ppi_search:
                 init = tf.global_variables_initializer()
                 self.session.run(init)
                 self.count_number_parameters()
-

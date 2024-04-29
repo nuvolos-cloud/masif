@@ -106,13 +106,13 @@ for target_pdb in benchmark_pdbs_target:
         # Run patchdock. Time it (do not include the time to generate the PDBs)
         os.path.dirname(outdir)
         pd_out_fn = os.path.join(source_pdb)
-        print(['/usr/bin/time', '-f', '\"user: %U\"', pd_bin, "params.txt", pd_out_fn])
+        print(["/usr/bin/time", "-f", '"user: %U"', pd_bin, "params.txt", pd_out_fn])
         process = subprocess.Popen(
-            ['/usr/bin/time', '-f', '%U', pd_bin, "params.txt", pd_out_fn],
-#            ['/usr/bin/time', '-f ', '\"user: %U\"', pd_bin, "params.txt", pd_out_fn],
+            ["/usr/bin/time", "-f", "%U", pd_bin, "params.txt", pd_out_fn],
+            #            ['/usr/bin/time', '-f ', '\"user: %U\"', pd_bin, "params.txt", pd_out_fn],
             cwd=outdir,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
         )
         stdout, stderr = process.communicate()
         stderr_lines = stderr.splitlines()
@@ -122,4 +122,3 @@ for target_pdb in benchmark_pdbs_target:
     # Save all runing times to a file called total_times.txt
     total_time_file = open("total_times.txt", "a+")
     total_time_file.write("{} {:.2f}\n".format(target_pdb, total_time))
-

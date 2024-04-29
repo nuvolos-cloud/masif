@@ -111,8 +111,8 @@ def train_masif_site(
             chains1 = ppi_pair_id.split("_")[1]
             if len(ppi_pair_id.split("_")) > 2:
                 chains2 = ppi_pair_id.split("_")[2]
-            else: 
-                chains2 = ''
+            else:
+                chains2 = ""
             pids = []
             if pdbid + "_" + chains1 in training_list:
                 pids.append("p1")
@@ -205,7 +205,13 @@ def train_masif_site(
                 else:
                     logfile.write("Training on {} {}\n".format(ppi_pair_id, pid))
                     feed_dict[learning_obj.keep_prob] = 1.0
-                    _, training_loss, norm_grad, score, eval_labels = learning_obj.session.run(
+                    (
+                        _,
+                        training_loss,
+                        norm_grad,
+                        score,
+                        eval_labels,
+                    ) = learning_obj.session.run(
                         [
                             learning_obj.optimizer,
                             learning_obj.data_loss,
@@ -231,8 +237,8 @@ def train_masif_site(
             chains1 = ppi_pair_id.split("_")[1]
             if len(ppi_pair_id.split("_")) > 2:
                 chains2 = ppi_pair_id.split("_")[2]
-            else: 
-                chains2 = ''
+            else:
+                chains2 = ""
             pids = []
             if pdbid + "_" + chains1 in testing_list:
                 pids.append("p1")
@@ -303,10 +309,12 @@ def train_masif_site(
         outstr += "Per protein AUC mean (validation): {:.4f}; median: {:.4f} for iter {}\n".format(
             np.mean(list_val_auc), np.median(list_val_auc), num_iter
         )
-        outstr += "Per protein AUC mean (test): {:.4f}; median: {:.4f} for iter {}\n".format(
-            np.mean(list_test_auc), np.median(list_test_auc), num_iter
+        outstr += (
+            "Per protein AUC mean (test): {:.4f}; median: {:.4f} for iter {}\n".format(
+                np.mean(list_test_auc), np.median(list_test_auc), num_iter
+            )
         )
-        
+
         if len(all_test_labels) > 0 and len(all_test_scores) > 0:
             flat_all_test_labels = np.concatenate(all_test_labels, axis=0)
             flat_all_test_scores = np.concatenate(all_test_scores, axis=0)
@@ -315,7 +323,7 @@ def train_masif_site(
             )
         else:
             outstr += "Testing auc (all points): N/A"
-        
+
         outstr += "Epoch took {:2f}s\n".format(time.time() - tic)
         logfile.write(outstr + "\n")
         print(outstr)

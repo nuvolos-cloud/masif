@@ -17,6 +17,7 @@ def mask_input_feat(input_feat, mask):
     mymask = np.where(np.array(mask) == 0.0)[0]
     return np.delete(input_feat, mymask, axis=2)
 
+
 """
 masif_ppi_search_train.py: Entry function to train the MaSIF-search neural network.
 Pablo Gainza - LPDI STI EPFL 2019
@@ -98,4 +99,3 @@ train_ppi_search(
     neg_input_feat,
     neg_mask,
 )
-

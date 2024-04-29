@@ -268,7 +268,14 @@ with tf.Session() as sess:
                 learning_obj.keep_prob: 1.0,
             }
 
-            _, training_loss, norm_grad, logits, logits_softmax, computed_loss = learning_obj.session.run(
+            (
+                _,
+                training_loss,
+                norm_grad,
+                logits,
+                logits_softmax,
+                computed_loss,
+            ) = learning_obj.session.run(
                 [
                     learning_obj.optimizer,
                     learning_obj.data_loss,
@@ -300,4 +307,3 @@ with tf.Session() as sess:
             total_iterations += 1
             if total_iterations == 40000:
                 break
-

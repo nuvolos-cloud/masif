@@ -27,6 +27,7 @@ def blockPrint():
     sys.stdout = open(os.devnull, "w")
     sys.stderr = open(os.devnull, "w")
 
+
 def enablePrint():
     sys.stdout = sys.__stdout__
     sys.stderr = sys.__stderr__
@@ -35,32 +36,26 @@ def enablePrint():
 masif_root = os.environ["masif_root"]
 top_dir = os.path.join(masif_root, "data/masif_pdl1_benchmark/")
 surf_dir = os.path.join(top_dir, masif_opts["ply_chain_dir"])
-iface_dir = os.path.join(
-    top_dir, masif_opts["site"]["out_pred_dir"]
-)
-ply_iface_dir = os.path.join(
-    top_dir, masif_opts["site"]["out_surf_dir"]
-)
+iface_dir = os.path.join(top_dir, masif_opts["site"]["out_pred_dir"])
+ply_iface_dir = os.path.join(top_dir, masif_opts["site"]["out_surf_dir"])
 
 desc_dir = os.path.join(masif_opts["ppi_search"]["desc_dir"])
 
 pdb_dir = os.path.join(top_dir, masif_opts["pdb_chain_dir"])
-precomp_dir = os.path.join(
-    top_dir, masif_opts["site"]["masif_precomputation_dir"]
-)
+precomp_dir = os.path.join(top_dir, masif_opts["site"]["masif_precomputation_dir"])
 
 # Extract a geodesic patch.
 def get_patch_geo(
     pcd, patch_coords, center, descriptors, outward_shift=0.25, flip=False
 ):
     """
-        Get a patch based on geodesic distances. 
-        pcd: the point cloud.
-        patch_coords: the geodesic distances.
-        center: the index of the center of the patch
-        descriptors: the descriptors for every point in the original surface.
-        outward_shift: expand the surface by a float value (for better alignment)
-        flip: invert the surface?
+    Get a patch based on geodesic distances.
+    pcd: the point cloud.
+    patch_coords: the geodesic distances.
+    center: the index of the center of the patch
+    descriptors: the descriptors for every point in the original surface.
+    outward_shift: expand the surface by a float value (for better alignment)
+    flip: invert the surface?
     """
 
     idx = patch_coords[center]
@@ -69,7 +64,7 @@ def get_patch_geo(
     except:
         set_trace()
     nrmls = np.asarray(pcd.normals)[idx, :]
-    # Expand the surface in the direction of the normals. 
+    # Expand the surface in the direction of the normals.
     pts = pts + outward_shift * nrmls
     if flip:
         nrmls = -np.asarray(pcd.normals)[idx, :]
@@ -81,17 +76,18 @@ def get_patch_geo(
     patch_descs.data = descriptors[idx, :].T
     return patch, patch_descs
 
+
 def subsample_patch_coords(top_dir, pdb, pid, cv=None, frac=1.0, radius=12.0):
     """
-        subsample_patch_coords: Read the geodesic coordinates in an easy to access format.
-        pdb: the id of the protein pair in PDBID_CHAIN1_CHAIN2 format.
-        pid: 'p1' if you want to read CHAIN1, 'p2' if you want to read CHAIN2
-        cv: central vertex (list of patches to select; if None, select all)
+    subsample_patch_coords: Read the geodesic coordinates in an easy to access format.
+    pdb: the id of the protein pair in PDBID_CHAIN1_CHAIN2 format.
+    pid: 'p1' if you want to read CHAIN1, 'p2' if you want to read CHAIN2
+    cv: central vertex (list of patches to select; if None, select all)
     """
     if cv is None:
-        pc = np.load(os.path.join(top_dir, pdb, pid+'_list_indices.npy'))
+        pc = np.load(os.path.join(top_dir, pdb, pid + "_list_indices.npy"))
     else:
-        temp = np.load(os.path.join(top_dir, pdb, pid+'_list_indices.npy'))[cv]
+        temp = np.load(os.path.join(top_dir, pdb, pid + "_list_indices.npy"))[cv]
         pc = {}
         for ix, key in enumerate(cv):
             pc[key] = temp[ix]
@@ -158,7 +154,9 @@ def match_descriptors(
     for ppi_pair_id in os.listdir(in_desc_dir):
         if ".npy" in ppi_pair_id or ".txt" in ppi_pair_id:
             continue
-        if count_proteins > 300 and ('4ZQK' not in ppi_pair_id and '3BIK' not in ppi_pair_id):
+        if count_proteins > 300 and (
+            "4ZQK" not in ppi_pair_id and "3BIK" not in ppi_pair_id
+        ):
             continue
         mydescdir = os.path.join(in_desc_dir, ppi_pair_id)
         for pid in pids:
@@ -279,7 +277,7 @@ def multidock(
                 CorrespondenceCheckerBasedOnDistance(1.0),
                 CorrespondenceCheckerBasedOnNormal(np.pi / 2),
             ],
-            RANSACConvergenceCriteria(ransac_iter, 500)
+            RANSACConvergenceCriteria(ransac_iter, 500),
         )
         ransac_time = ransac_time + (time.time() - tic)
         # result = registration_icp(source_patch, target_pcd, 1.5,
@@ -449,13 +447,16 @@ for name in matched_dict.keys():
 
     tic = time.time()
     source_vix = matched_dict[name]
-#    try:
+    #    try:
     source_coords = subsample_patch_coords(
-            precomp_dir, ppi_pair_id, pid, cv=source_vix, 
-        )
-#    except:
-#        print("Coordinates not found. continuing.")
-#        continue
+        precomp_dir,
+        ppi_pair_id,
+        pid,
+        cv=source_vix,
+    )
+    #    except:
+    #        print("Coordinates not found. continuing.")
+    #        continue
     source_desc = np.load(
         os.path.join(desc_dir, ppi_pair_id, pid + "_desc_straight.npy")
     )
@@ -507,4 +508,3 @@ for name in matched_dict.keys():
 
 end_time = time.time()
 out_log.write("Took {}s\n".format(end_time - start_time))
-

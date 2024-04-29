@@ -15,7 +15,7 @@ radii["S"] = "1.800000"
 radii["P"] = "1.800000"
 radii["Z"] = "1.39"
 radii["X"] = "0.770000"  ## Radii of CB or CA in disembodied case.
-# This  polar hydrogen's names correspond to that of the program Reduce. 
+# This  polar hydrogen's names correspond to that of the program Reduce.
 polarHydrogens = {}
 polarHydrogens["ALA"] = ["H"]
 polarHydrogens["GLY"] = ["H"]
@@ -149,4 +149,3 @@ acceptorAngleAtom["OG1"] = "CB"
 # THR donor:
 # Angle: OG1-HG1-X: 180
 donorAtom["HG1"] = "OG1"
-

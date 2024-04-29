@@ -74,4 +74,3 @@ class Simple_mesh:
 
     def get_attribute(self, attribute_name):
         return np.copy(self.attributes[attribute_name])
-

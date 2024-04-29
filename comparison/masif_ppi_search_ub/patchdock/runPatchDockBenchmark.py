@@ -11,12 +11,10 @@ from Bio.PDB import *
 struct_dir = "/home/gainza/lpdi_fs/masif_paper/masif/data/masif_ppi_search_ub/data_preparation/01-benchmark_pdbs/"
 benchmark_list_fn = "../benchmark_list.txt"
 # Precomputation dir for masif. The location of the target vertex is extracted from here.
-precomp_dir = (
-    "../../../data/masif_ppi_search_ub/data_preparation/04b-precomputation_12A/precomputation"
-)
+precomp_dir = "../../../data/masif_ppi_search_ub/data_preparation/04b-precomputation_12A/precomputation"
 # Set location of your patchdock binarires here.
-#pd_bin = "/your/path/to/PatchDock/patch_dock.Linux"
-#trans_output_bin = "/your/path/to/PatchDock/transOutput.pl"
+# pd_bin = "/your/path/to/PatchDock/patch_dock.Linux"
+# trans_output_bin = "/your/path/to/PatchDock/transOutput.pl"
 pd_bin = "/home/gainza/lpdi_fs/seeder/data/ppi_benchmark_complexes/10-patchdock/PatchDock/patch_dock.Linux"
 trans_output_bin = "/home/gainza/lpdi_fs/seeder/data/ppi_benchmark_complexes/10-patchdock/PatchDock/transOutput.pl"
 
@@ -107,7 +105,7 @@ for target_pdb in benchmark_pdbs_target:
         pd_out_fn = os.path.join(source_pdb)
         print([pd_bin, "params.txt", pd_out_fn])
         process = subprocess.Popen(
-            ['/usr/bin/time', '-f', '%U', pd_bin, "params.txt", pd_out_fn],
+            ["/usr/bin/time", "-f", "%U", pd_bin, "params.txt", pd_out_fn],
             cwd=outdir,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -120,4 +118,3 @@ for target_pdb in benchmark_pdbs_target:
     # Save all runing times to a file called total_times.txt
     total_time_file = open("total_times.txt", "a+")
     total_time_file.write("{} {:.2f}\n".format(target_pdb, total_time))
-

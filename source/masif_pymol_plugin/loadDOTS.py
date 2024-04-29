@@ -67,4 +67,3 @@ def load_dots(
         group_names = name
         cmd.load_cgo(obj, name, 1.0)
     # Draw normals
-

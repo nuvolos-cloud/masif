@@ -54,9 +54,7 @@ pdb_dir = os.path.join(data_dir, masif_opts["pdb_chain_dir"])
 precomp_dir = os.path.join(
     data_dir, masif_opts["ppi_search"]["masif_precomputation_dir"]
 )
-precomp_dir_9A = os.path.join(
-    data_dir, masif_opts["site"]["masif_precomputation_dir"]
-)
+precomp_dir_9A = os.path.join(data_dir, masif_opts["site"]["masif_precomputation_dir"])
 
 benchmark_list = "../benchmark_list.txt"
 
@@ -106,8 +104,8 @@ def rand_rotation_matrix(deflection=1.0, randnums=None):
 
 def get_center_and_random_rotate(pcd):
     """
-        Get the center of a point cloud and randomly rotate it.
-        pcd: the point cloud.
+    Get the center of a point cloud and randomly rotate it.
+    pcd: the point cloud.
     """
     pts = pcd.points
     mean_pt = np.mean(pts, axis=0)
@@ -124,13 +122,13 @@ def get_patch_geo(
     pcd, patch_coords, center, descriptors, outward_shift=0.25, flip=False
 ):
     """
-        Get a patch based on geodesic distances. 
-        pcd: the point cloud.
-        patch_coords: the geodesic distances.
-        center: the index of the center of the patch
-        descriptors: the descriptors for every point in the original surface.
-        outward_shift: expand the surface by a float value (for better alignment)
-        flip: invert the surface?
+    Get a patch based on geodesic distances.
+    pcd: the point cloud.
+    patch_coords: the geodesic distances.
+    center: the index of the center of the patch
+    descriptors: the descriptors for every point in the original surface.
+    outward_shift: expand the surface by a float value (for better alignment)
+    flip: invert the surface?
     """
     idx = patch_coords[center]
     pts = np.asarray(pcd.points)[idx, :]
@@ -157,7 +155,7 @@ def multidock(
     ransac_radius=1.0,
 ):
     """
-    Multi-docking protocol: Here is where the alignment is actually made. 
+    Multi-docking protocol: Here is where the alignment is actually made.
     This method aligns each of the K prematched decoy patches to the target using tehe
     RANSAC algorithm followed by icp
     """
@@ -189,10 +187,16 @@ def multidock(
                 CorrespondenceCheckerBasedOnDistance(2.0),
                 CorrespondenceCheckerBasedOnNormal(np.pi / 2),
             ],
-            RANSACConvergenceCriteria(ransac_iter, 500), random_seed
+            RANSACConvergenceCriteria(ransac_iter, 500),
+            random_seed,
         )
-        result = registration_icp(source_patch, target_pcd, 
-            1.0, result.transformation, TransformationEstimationPointToPlane())
+        result = registration_icp(
+            source_patch,
+            target_pcd,
+            1.0,
+            result.transformation,
+            TransformationEstimationPointToPlane(),
+        )
         ransac_time = ransac_time + (time.time() - tic)
 
         tic = time.time()
@@ -225,7 +229,7 @@ def test_alignments(
     interface_dist=10.0,
 ):
     """
-    Verify the alignment against the ground truth. 
+    Verify the alignment against the ground truth.
     """
     structure_coords = np.array(
         [
@@ -276,7 +280,7 @@ def compute_desc_dist_score(
     target_pcd, source_pcd, corr, target_desc, source_desc, cutoff=2.0
 ):
     """
-        compute_desc_dist_score: a simple scoring based on fingerprints 
+    compute_desc_dist_score: a simple scoring based on fingerprints
     """
 
     # Compute scores based on correspondences.
@@ -305,18 +309,19 @@ from IPython.core.debugger import set_trace
 
 def subsample_patch_coords(pdb, pid, cv=None):
     """
-        subsample_patch_coords: Read the geodesic coordinates in an easy to access format.
-        pdb: the id of the protein pair in PDBID_CHAIN1_CHAIN2 format.
-        pid: 'p1' if you want to read CHAIN1, 'p2' if you want to read CHAIN2
-        cv: central vertex 
+    subsample_patch_coords: Read the geodesic coordinates in an easy to access format.
+    pdb: the id of the protein pair in PDBID_CHAIN1_CHAIN2 format.
+    pid: 'p1' if you want to read CHAIN1, 'p2' if you want to read CHAIN2
+    cv: central vertex
     """
 
     if cv is None:
-        pc = np.load(os.path.join(precomp_dir_9A, pdb, pid+'_list_indices.npy'))
+        pc = np.load(os.path.join(precomp_dir_9A, pdb, pid + "_list_indices.npy"))
     else:
         pc = {}
-        pc[cv] = np.load(os.path.join(precomp_dir_9A, pdb, pid+'_list_indices.npy'))[cv]
-
+        pc[cv] = np.load(os.path.join(precomp_dir_9A, pdb, pid + "_list_indices.npy"))[
+            cv
+        ]
 
     return pc
 
@@ -498,7 +503,12 @@ for target_ix, target_pdb in enumerate(rand_list):
         if source_pdb == target_pdb:
 
             for j, res in enumerate(all_results):
-                rmsd, clashing, structure_coord_pcd, structure_coord_pcd_notTransformed = test_alignments(
+                (
+                    rmsd,
+                    clashing,
+                    structure_coord_pcd,
+                    structure_coord_pcd_notTransformed,
+                ) = test_alignments(
                     res.transformation,
                     random_transformation,
                     gt_source_struct,
@@ -581,10 +591,14 @@ for pdb_ix in range(len(all_positive_scores)):
 
 ranks = np.array(ranks)
 print(
-    "Number in top 100 {} out of {}".format(np.sum(ranks <= 100), len(all_positive_scores))
+    "Number in top 100 {} out of {}".format(
+        np.sum(ranks <= 100), len(all_positive_scores)
+    )
 )
 print(
-    "Number in top 10 {} out of {}".format(np.sum(ranks <= 10), len(all_positive_scores))
+    "Number in top 10 {} out of {}".format(
+        np.sum(ranks <= 10), len(all_positive_scores)
+    )
 )
 print(
     "Number in top 1 {} out of {}".format(np.sum(ranks <= 1), len(all_positive_scores))
@@ -597,22 +611,30 @@ print(
 
 outfile = open("results_{}.txt".format(method), "a+")
 outfile.write("K,Total,Top2000,Top1000,Top100,Top10,Top5,Top1,MeanRMSD,Time\n")
-top2000= np.sum(ranks<=2000)
-top1000= np.sum(ranks<=1000)
-top100= np.sum(ranks<=100)
-top10= np.sum(ranks<=10)
-top5= np.sum(ranks<=5)
-top1= np.sum(ranks<=1)
+top2000 = np.sum(ranks <= 2000)
+top1000 = np.sum(ranks <= 1000)
+top100 = np.sum(ranks <= 100)
+top10 = np.sum(ranks <= 10)
+top5 = np.sum(ranks <= 5)
+top1 = np.sum(ranks <= 1)
 meanrmsd = np.mean(rmsds)
 runtime = np.sum(all_time_global)
 
 
 outline = "{},{},{},{},{},{},{},{},{},{}\n".format(
-    K, len(all_positive_scores), top2000, top1000, top100, top10, top5, top1, meanrmsd, runtime
+    K,
+    len(all_positive_scores),
+    top2000,
+    top1000,
+    top100,
+    top10,
+    top5,
+    top1,
+    meanrmsd,
+    runtime,
 )
 outfile.write(outline)
 
 outfile.close()
 
 sys.exit(0)
-

@@ -212,4 +212,3 @@ def assignChargesToNewMesh(new_vertices, old_vertices, old_charges, seeder_opts)
         dists, result = kdt.query(testset)
         new_charges = old_charges[result]
     return new_charges
-

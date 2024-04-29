@@ -13,9 +13,10 @@ This file is part of MaSIF.
 Released under an Apache License 2.0
 """
 
+
 def computeAPBS(vertices, pdb_file, tmp_file_base):
     """
-        Calls APBS, pdb2pqr, and multivalue and returns the charges per vertex
+    Calls APBS, pdb2pqr, and multivalue and returns the charges per vertex
     """
     fields = tmp_file_base.split("/")[0:-1]
     directory = "/".join(fields) + "/"
@@ -29,7 +30,7 @@ def computeAPBS(vertices, pdb_file, tmp_file_base):
         "--apbs-input",
         filename_base + ".in",
         pdbname,
-        filename_base +".pqr",
+        filename_base + ".pqr",
     ]
     print(f"### Running pdb2pqr_bin: {args}")
     p2 = Popen(args, stdout=PIPE, stderr=PIPE, cwd=directory)
@@ -68,11 +69,11 @@ def computeAPBS(vertices, pdb_file, tmp_file_base):
     print(f"### Chargefile closed.")
 
     remove_fn = os.path.join(directory, filename_base)
-    #os.remove(remove_fn, )
-    os.remove(remove_fn+'.csv')
-    os.remove(remove_fn+'.pqr.dx')
-    os.remove(remove_fn+'.in')
-    #os.remove(remove_fn+'-input.p')
-    os.remove(remove_fn+'_out.csv')
+    # os.remove(remove_fn, )
+    os.remove(remove_fn + ".csv")
+    os.remove(remove_fn + ".pqr.dx")
+    os.remove(remove_fn + ".in")
+    # os.remove(remove_fn+'-input.p')
+    os.remove(remove_fn + "_out.csv")
 
     return charges

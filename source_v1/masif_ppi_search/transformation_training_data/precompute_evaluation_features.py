@@ -1,4 +1,5 @@
 import os
+
 # import dask
 import numpy as np
 from scipy.spatial import cKDTree
@@ -13,7 +14,7 @@ Released under an Apache License 2.0
 
 # @dask.delayed
 def save_nn(d):
-    """ Computes nearest neighbours of points on aligned patches on target patch"""
+    """Computes nearest neighbours of points on aligned patches on target patch"""
 
     aligned_source_patches = np.load(
         d + "/aligned_source_patches.npy", encoding="latin1"
@@ -37,7 +38,7 @@ def save_nn(d):
 
 # @dask.delayed
 def preprocess_protein(d):
-    """ Precomputes features to train evaluate network on"""
+    """Precomputes features to train evaluate network on"""
     n_features = 3
 
     aligned_source_patches = np.load(

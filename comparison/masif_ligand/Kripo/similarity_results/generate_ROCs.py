@@ -169,4 +169,3 @@ fpr025, tpr025, thresholds025 = roc_curve(
 )
 np.save("kripo_fpr025.npy", fpr025)
 np.save("kripo_tpr025.npy", tpr025)
-

@@ -30,4 +30,3 @@ def computeHydrophobicity(names):
         aa = name.split("_")[3]
         hp[ix] = kd_scale[aa]
     return hp
-

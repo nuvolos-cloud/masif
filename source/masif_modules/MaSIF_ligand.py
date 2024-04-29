@@ -31,7 +31,9 @@ class MaSIF_ligand:
         return frobenius_norm
 
     def build_sparse_matrix_softmax(self, idx_non_zero_values, X, dense_shape_A):
-        A = tf.compat.v1.SparseTensorValue(idx_non_zero_values, tf.squeeze(X), dense_shape_A)
+        A = tf.compat.v1.SparseTensorValue(
+            idx_non_zero_values, tf.squeeze(X), dense_shape_A
+        )
         A = tf.sparse.reorder(A)  # n_edges x n_edges
         A = tf.sparse.softmax(A)
 
@@ -204,7 +206,9 @@ class MaSIF_ligand:
                 self.input_feat = tf.compat.v1.placeholder(
                     tf.float32, shape=[None, None, self.n_feat]
                 )  # batch_size, n_vertices, n_feat
-                self.mask = tf.compat.v1.placeholder(tf.float32)  # batch_size, n_vertices, 1
+                self.mask = tf.compat.v1.placeholder(
+                    tf.float32
+                )  # batch_size, n_vertices, 1
                 self.labels = tf.compat.v1.placeholder(tf.float32)
                 self.global_desc_1 = []
                 b_conv = []
@@ -227,7 +231,9 @@ class MaSIF_ligand:
                             self.n_thetas * self.n_rhos,
                             self.n_thetas * self.n_rhos,
                         ],
-                        initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"),
+                        initializer=tf.compat.v1.keras.initializers.VarianceScaling(
+                            scale=1.0, mode="fan_avg", distribution="uniform"
+                        ),
                     )
 
                     self.global_desc_1.append(
@@ -254,19 +260,21 @@ class MaSIF_ligand:
 
                 # refine global desc with MLP
                 self.global_desc_1 = tf.keras.layers.Dense(
-                    self.n_thetas * self.n_rhos,
-                    activation=tf.nn.relu
+                    self.n_thetas * self.n_rhos, activation=tf.nn.relu
                 )(self.global_desc_1)
                 self.global_desc_1 = tf.matmul(
                     tf.transpose(self.global_desc_1), self.global_desc_1
                 ) / tf.cast(tf.shape(self.global_desc_1)[0], tf.float32)
                 self.global_desc_1 = tf.reshape(self.global_desc_1, [1, -1])
-                self.global_desc_1 = tf.nn.dropout(self.global_desc_1, rate=1 - (self.keep_prob))
-                self.global_desc_1 = tf.keras.layers.Dense(
-                    64,
-                    activation=tf.nn.relu
+                self.global_desc_1 = tf.nn.dropout(
+                    self.global_desc_1, rate=1 - (self.keep_prob)
+                )
+                self.global_desc_1 = tf.keras.layers.Dense(64, activation=tf.nn.relu)(
+                    self.global_desc_1
+                )
+                self.logits = tf.keras.layers.Dense(
+                    self.n_ligands, activation=tf.identity
                 )(self.global_desc_1)
-                self.logits = tf.keras.layers.Dense(self.n_ligands, activation=tf.identity)(self.global_desc_1)
                 # compute data loss
                 self.labels = tf.expand_dims(self.labels, axis=0)
                 self.logits = tf.expand_dims(self.logits, axis=0)
@@ -283,7 +291,9 @@ class MaSIF_ligand:
                     learning_rate=learning_rate
                 ).minimize(self.data_loss)
 
-                self.var_grad = tf.gradients(self.data_loss, tf.compat.v1.trainable_variables())
+                self.var_grad = tf.gradients(
+                    self.data_loss, tf.compat.v1.trainable_variables()
+                )
                 for k in range(len(self.var_grad)):
                     if self.var_grad[k] is None:
                         print(tf.compat.v1.trainable_variables()[k])
@@ -301,4 +311,3 @@ class MaSIF_ligand:
                 init = tf.compat.v1.global_variables_initializer()
                 self.session.run(init)
                 self.count_number_parameters()
-

@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
+
 class MaSIF_site:
 
     """
@@ -292,7 +293,7 @@ class MaSIF_site:
                             self.n_thetas * self.n_rhos,
                             self.n_thetas * self.n_rhos,
                         ],
-                        initializer = tf.initializers.GlorotUniform(),
+                        initializer=tf.initializers.GlorotUniform(),
                     )
 
                     rho_coords = self.rho_coords
@@ -514,4 +515,3 @@ class MaSIF_site:
                 init = tf.global_variables_initializer()
                 self.session.run(init)
                 self.count_number_parameters()
-

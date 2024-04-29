@@ -71,7 +71,7 @@ for ppi_pair_id in ppi_pair_ids:
     print(ppi_pair_id)
     in_dir = parent_in_dir + ppi_pair_id + "/"
 
-    fields = ppi_pair_id.split('_')
+    fields = ppi_pair_id.split("_")
     if len(fields) < 2:
         continue
     pdbid = ppi_pair_id.split("_")[0]
@@ -103,7 +103,9 @@ for ppi_pair_id in ppi_pair_ids:
         input_feat = np.load(in_dir + pid + "_input_feat.npy")
         input_feat = mask_input_feat(input_feat, params["feat_mask"])
         mask = np.load(in_dir + pid + "_mask.npy")
-        indices = np.load(in_dir + pid + "_list_indices.npy", encoding="latin1", allow_pickle=True)
+        indices = np.load(
+            in_dir + pid + "_list_indices.npy", encoding="latin1", allow_pickle=True
+        )
         labels = np.zeros((len(mask)))
 
         print("Total number of patches:{} \n".format(len(mask)))
@@ -124,9 +126,8 @@ for ppi_pair_id in ppi_pair_ids:
                 len(scores[0])
             )
         )
-        print("GPU time (real time, not actual GPU time): {:.3f}s".format(toc-tic))
+        print("GPU time (real time, not actual GPU time): {:.3f}s".format(toc - tic))
         np.save(
             params["out_pred_dir"] + "/pred_" + pdbid + "_" + chains[ix] + ".npy",
             scores,
         )
-

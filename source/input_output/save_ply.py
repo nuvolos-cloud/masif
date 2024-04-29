@@ -1,5 +1,6 @@
 import pymesh
 import numpy
+
 """
 read_ply.py: Save a ply file to disk using pymesh and load the attributes used by MaSIF. 
 Pablo Gainza - LPDI STI EPFL 2019
@@ -19,9 +20,9 @@ def save_ply(
     iface=None,
     normalize_charges=False,
 ):
-    """ Save vertices, mesh in ply format.
-        vertices: coordinates of vertices
-        faces: mesh
+    """Save vertices, mesh in ply format.
+    vertices: coordinates of vertices
+    faces: mesh
     """
     mesh = pymesh.form_mesh(vertices, faces)
     if normals is not None:
@@ -55,4 +56,3 @@ def save_ply(
     pymesh.save_mesh(
         filename, mesh, *mesh.get_attribute_names(), use_float=True, ascii=True
     )
-

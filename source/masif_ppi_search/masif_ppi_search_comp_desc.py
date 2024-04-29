@@ -85,29 +85,28 @@ for count, ppi_pair_id in enumerate(ppi_list):
     print(ppi_pair_id)
 
     out_desc_dir = os.path.join(params["desc_dir"], ppi_pair_id)
-    if not os.path.exists(os.path.join(out_desc_dir, 'p1_desc_straight.npy')):
+    if not os.path.exists(os.path.join(out_desc_dir, "p1_desc_straight.npy")):
         os.mkdir(out_desc_dir)
-#    else:
-#        # Ignore this one as it was already computed.
-#        print('Ignoring descriptor computation for {} as it was already computed'.format(ppi_pair_id))
-#        continue
+    #    else:
+    #        # Ignore this one as it was already computed.
+    #        print('Ignoring descriptor computation for {} as it was already computed'.format(ppi_pair_id))
+    #        continue
 
     pdbid = ppi_pair_id.split("_")[0]
     chain1 = ppi_pair_id.split("_")[1]
-    if len(ppi_pair_id.split("_")) > 2: 
+    if len(ppi_pair_id.split("_")) > 2:
         chain2 = ppi_pair_id.split("_")[2]
     else:
-        chain2 = ''
-
+        chain2 = ""
 
     # Read shape complementarity labels if chain2 != ''
-    if chain2 != '':
+    if chain2 != "":
         try:
             labels = np.load(in_dir + "p1" + "_sc_labels.npy")
             mylabels = labels[0]
             labels = np.median(mylabels, axis=1)
-        except:# Exception, e:
-            print('Could not open '+in_dir+'p1'+'_sc_labels.npy: '+str(e))
+        except:  # Exception, e:
+            print("Could not open " + in_dir + "p1" + "_sc_labels.npy: " + str(e))
             continue
         print("Number of vertices: {}".format(len(labels)))
 
@@ -119,14 +118,12 @@ for count, ppi_pair_id in enumerate(ppi_list):
     else:
         l = []
 
-
-
     if len(l) > 0 and chain2 != "":
-        ply_fn1 = masif_opts['ply_file_template'].format(pdbid, chain1)
+        ply_fn1 = masif_opts["ply_file_template"].format(pdbid, chain1)
         v1 = pymesh.load_mesh(ply_fn1).vertices[l]
         from sklearn.neighbors import NearestNeighbors
 
-        ply_fn2 = masif_opts['ply_file_template'].format(pdbid, chain2 )
+        ply_fn2 = masif_opts["ply_file_template"].format(pdbid, chain2)
         v2 = pymesh.load_mesh(ply_fn2).vertices
 
         # For each point in v1, find the closest point in v2.
@@ -279,4 +276,3 @@ if len(all_pos_dists) > 0:
     )
     np.save(params["desc_dir"] + "/all_pos_dists_pos_neg.npy", all_pos_dists_pos_neg)
     np.save(params["desc_dir"] + "/all_neg_dists_pos_neg.npy", all_neg_dists_pos_neg)
-

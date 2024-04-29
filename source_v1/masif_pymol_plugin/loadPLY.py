@@ -4,6 +4,7 @@ import os, math, re
 from pymol.cgo import *
 import os.path
 import numpy as np
+
 """
    loadPLY.py: This pymol function loads ply files into pymol.
     Pablo Gainza - LPDI STI EPFL 2016-2019
@@ -466,4 +467,3 @@ def load_giface(filename, color="white", name="giface", dotSize=0.2, lineSize=1.
     # obj.append(END)
     name = "giface_verts_" + filename
     cmd.load_cgo(obj, name, 1.0)
-
