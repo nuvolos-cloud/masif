@@ -16,6 +16,11 @@ import time
 from scipy.sparse import csr_matrix, coo_matrix
 import pymesh
 
+
+def pad_or_truncate(some_list, target_len):
+    return some_list[:target_len] + [0]*(target_len - len(some_list))
+    
+
 def compute_polar_coordinates(mesh, do_fast=True, radius=12, max_vertices=200):
     """
     compute_polar_coordinates: compute the polar coordinates for every patch in the mesh. 
@@ -110,7 +115,8 @@ def compute_polar_coordinates(mesh, do_fast=True, radius=12, max_vertices=200):
     for i in range(n): 
         dists_i = d2[i]
         sorted_dists_i = sorted(dists_i.items(), key=lambda kv: kv[1])
-        neigh = [int(x[0]) for x in sorted_dists_i[0:max_vertices]] 
+        neigh = [int(x[0]) for x in sorted_dists_i[0:max_vertices]]
+        pad_or_truncate(neigh, max_vertices)
         neigh_indices.append(neigh)
         rho_out[i,:len(neigh)]= np.squeeze(np.asarray(D[i,neigh].todense()))
         theta_out[i,:len(neigh)]= np.squeeze(theta[i][neigh])
@@ -326,7 +332,7 @@ def compute_theta_all_fast(D, vertices, faces, normals, idx, radius):
         scaling. Then, for points farther than radius/2, the shortest line to the center is used. 
         This speeds up the method by a factor of about 100.
     """
-    mymds = MDS(n_components=2, n_init=1, eps=0.1, max_iter=50, dissimilarity='precomputed', n_jobs=1)
+    mymds = MDS(n_components=2, n_init=1, eps=0.1, max_iter=50, dissimilarity='precomputed', n_jobs=1, normalized_stress=False)
     all_theta = []
     start_loop = time.perf_counter()
     only_mds = 0.0
@@ -338,7 +344,8 @@ def compute_theta_all_fast(D, vertices, faces, normals, idx, radius):
         neigh_i = neigh[1][ii]
         pair_dist_i = D[neigh_i,:][:,neigh_i]
         pair_dist_i = pair_dist_i.todense()
-
+        pair_dist_i = np.asarray(pair_dist_i)
+        
         # Plane_i: the 2D plane for all neighbors of i
         tic = time.perf_counter()
         plane_i = call_mds(mymds, pair_dist_i)

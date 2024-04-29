@@ -1,6 +1,5 @@
-import tensorflow as tf
 import numpy as np
-
+import tensorflow as tf
 
 class MaSIF_site:
 
@@ -293,7 +292,7 @@ class MaSIF_site:
                             self.n_thetas * self.n_rhos,
                             self.n_thetas * self.n_rhos,
                         ],
-                        initializer=tf.contrib.layers.xavier_initializer(),
+                        initializer = tf.initializers.GlorotUniform(),
                     )
 
                     rho_coords = self.rho_coords
