@@ -5,6 +5,7 @@ from IPython.core.debugger import set_trace
 import importlib
 import sys
 from default_config.masif_opts import masif_opts
+import tensorflow as tf
 
 """
 masif_site_train.py: Entry function to train MaSIF-site.
@@ -13,6 +14,7 @@ This file is part of MaSIF.
 Released under an Apache License 2.0
 """
 
+tf.compat.v1.disable_v2_behavior()
 params = masif_opts["site"]
 
 if len(sys.argv) > 1:
@@ -60,7 +62,6 @@ else:
 
 # train
 from masif_modules.train_masif_site import train_masif_site
-import tensorflow as tf
 
 print(params["feat_mask"])
 if not os.path.exists(params["model_dir"]):
@@ -68,7 +69,6 @@ if not os.path.exists(params["model_dir"]):
 else:
     # Load existing network.
     print ('Reading pre-trained network')
-    tf.config.experimental_run_functions_eagerly(True)  # Enable eager execution
     learning_obj.saver.restore(learning_obj.session, params['model_dir']+'model')
 
 train_masif_site(learning_obj, params)
