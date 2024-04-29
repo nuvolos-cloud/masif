@@ -60,6 +60,7 @@ else:
 
 # train
 from masif_modules.train_masif_site import train_masif_site
+import tensorflow as tf
 
 print(params["feat_mask"])
 if not os.path.exists(params["model_dir"]):
@@ -67,6 +68,7 @@ if not os.path.exists(params["model_dir"]):
 else:
     # Load existing network.
     print ('Reading pre-trained network')
+    tf.config.experimental_run_functions_eagerly(True)  # Enable eager execution
     learning_obj.saver.restore(learning_obj.session, params['model_dir']+'model')
 
 train_masif_site(learning_obj, params)
