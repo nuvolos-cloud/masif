@@ -15,7 +15,7 @@ class MaSIF_site:
             print(variable)
             variable_parameters = 1
             for dim in shape:
-                variable_parameters *= dim.value
+                variable_parameters *= int(dim)
             print(variable_parameters)
             total_parameters += variable_parameters
         print("Total number parameters: %d" % total_parameters)
