@@ -36,7 +36,7 @@ output_model = out_dir + "model"
 if not os.path.exists(params["model_dir"]):
     os.makedirs(params["model_dir"])
 
-with tf.Session() as sess:
+with tf.compat.v1.Session() as sess:
     # Build the neural network model
     learning_obj = MaSIF_ligand(
         sess,
@@ -55,11 +55,11 @@ with tf.Session() as sess:
         num_training_samples = 1030
         num_validation_samples = 120
         num_testing_samples = 290
-        training_iterator = training_data.make_one_shot_iterator()
+        training_iterator = tf.compat.v1.data.make_one_shot_iterator(training_data)
         training_next_element = training_iterator.get_next()
-        validation_iterator = validation_data.make_one_shot_iterator()
+        validation_iterator = tf.compat.v1.data.make_one_shot_iterator(validation_data)
         validation_next_element = validation_iterator.get_next()
-        testing_iterator = testing_data.make_one_shot_iterator()
+        testing_iterator = tf.compat.v1.data.make_one_shot_iterator(testing_data)
         testing_next_element = testing_iterator.get_next()
 
         training_losses = []
@@ -236,7 +236,7 @@ with tf.Session() as sess:
         training_losses = []
         training_ytrue = []
         training_ypred = []
-        training_iterator = training_data.make_one_shot_iterator()
+        training_iterator = tf.compat.v1.data.make_one_shot_iterator(training_data)
         training_next_element = training_iterator.get_next()
         for num_sample in range(num_training_samples):
             try:

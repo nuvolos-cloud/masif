@@ -9,7 +9,7 @@ class MaSIF_site:
 
     def count_number_parameters(self):
         total_parameters = 0
-        for variable in tf.trainable_variables():
+        for variable in tf.compat.v1.trainable_variables():
             # shape is an array of tf.Dimension
             shape = variable.get_shape()
             print(variable)
@@ -27,9 +27,9 @@ class MaSIF_site:
         return frobenius_norm
 
     def build_sparse_matrix_softmax(self, idx_non_zero_values, X, dense_shape_A):
-        A = tf.SparseTensorValue(idx_non_zero_values, tf.squeeze(X), dense_shape_A)
-        A = tf.sparse_reorder(A)  # n_edges x n_edges
-        A = tf.sparse_softmax(A)
+        A = tf.compat.v1.SparseTensorValue(idx_non_zero_values, tf.squeeze(X), dense_shape_A)
+        A = tf.sparse.reorder(A)  # n_edges x n_edges
+        A = tf.sparse.softmax(A)
 
         return A
 
@@ -82,7 +82,7 @@ class MaSIF_site:
             thetas_coords_ = tf.reshape(theta_coords, [-1, 1])  # batch_size*n_vertices
 
             thetas_coords_ += k * 2 * np.pi / self.n_rotations
-            thetas_coords_ = tf.mod(thetas_coords_, 2 * np.pi)
+            thetas_coords_ = tf.math.floormod(thetas_coords_, 2 * np.pi)
             rho_coords_ = tf.exp(
                 -tf.square(rho_coords_ - mu_rho) / (tf.square(sigma_rho) + eps)
             )
@@ -104,7 +104,7 @@ class MaSIF_site:
                 mean_gauss_activation
             ):  # computes mean weights for the different gaussians
                 gauss_activations /= (
-                    tf.reduce_sum(gauss_activations, 1, keep_dims=True) + eps
+                    tf.reduce_sum(gauss_activations, 1, keepdims=True) + eps
                 )  # batch_size, n_vertices, n_gauss
 
             gauss_activations = tf.expand_dims(
@@ -134,12 +134,12 @@ class MaSIF_site:
         neg_thresh = 0.0
         pos_labels = self.labels[:, 0]
         n_pos = tf.reduce_sum(pos_labels)
-        pos_scores = tf.multiply(self.logits[:, 0], tf.to_float(pos_labels))
+        pos_scores = tf.multiply(self.logits[:, 0], tf.cast(pos_labels, dtype=tf.float32))
         pos_scores = tf.reduce_sum(pos_scores) / n_pos
 
         neg_labels = self.labels[:, 1]
         n_neg = tf.reduce_sum(neg_labels)
-        neg_scores = tf.multiply(self.logits[:, 1], tf.to_float(neg_labels))
+        neg_scores = tf.multiply(self.logits[:, 1], tf.cast(neg_labels, dtype=tf.float32))
         neg_scores = tf.reduce_sum(neg_scores) / n_neg
 
         data_loss = neg_scores - pos_scores
@@ -174,7 +174,7 @@ class MaSIF_site:
 
         with tf.Graph().as_default() as g:
             self.graph = g
-            tf.set_random_seed(0)
+            tf.compat.v1.set_random_seed(0)
             with tf.device(idx_gpu):
 
                 initial_coords = self.compute_initial_coordinates()
@@ -253,24 +253,24 @@ class MaSIF_site:
                         name="sigma_theta_{}".format("l4"),
                     )
 
-                self.rho_coords = tf.placeholder(
+                self.rho_coords = tf.compat.v1.placeholder(
                     tf.float32
                 )  # batch_size, n_vertices, 1
-                self.theta_coords = tf.placeholder(
+                self.theta_coords = tf.compat.v1.placeholder(
                     tf.float32
                 )  # batch_size, n_vertices, 1
-                self.input_feat = tf.placeholder(
+                self.input_feat = tf.compat.v1.placeholder(
                     tf.float32, shape=[None, None, self.n_feat]
                 )  # batch_size, n_vertices, n_feat
-                self.mask = tf.placeholder(tf.float32)  # batch_size, n_vertices, 1
+                self.mask = tf.compat.v1.placeholder(tf.float32)  # batch_size, n_vertices, 1
 
-                self.pos_idx = tf.placeholder(tf.int32)  # batch_size/2
-                self.neg_idx = tf.placeholder(tf.int32)  # batch_size/2
-                self.labels = tf.placeholder(tf.int32)  # batch_size, n_labels
-                self.indices_tensor = tf.placeholder(
+                self.pos_idx = tf.compat.v1.placeholder(tf.int32)  # batch_size/2
+                self.neg_idx = tf.compat.v1.placeholder(tf.int32)  # batch_size/2
+                self.labels = tf.compat.v1.placeholder(tf.int32)  # batch_size, n_labels
+                self.indices_tensor = tf.compat.v1.placeholder(
                     tf.int32
                 )  # batch_size, max_verts (< 30)
-                self.keep_prob = tf.placeholder(tf.float32)  # scalar
+                self.keep_prob = tf.compat.v1.placeholder(tf.float32)  # scalar
 
                 self.global_desc = []
 
@@ -286,7 +286,7 @@ class MaSIF_site:
                 for i in range(self.n_feat):
                     my_input_feat = tf.expand_dims(self.input_feat[:, :, i], 2)
 
-                    W_conv = tf.get_variable(
+                    W_conv = tf.compat.v1.get_variable(
                         "W_conv_{}".format(i),
                         shape=[
                             self.n_thetas * self.n_rhos,
@@ -319,14 +319,13 @@ class MaSIF_site:
                 self.global_desc = tf.reshape(
                     self.global_desc, [-1, self.n_thetas * self.n_rhos * self.n_feat]
                 )
-                self.global_desc = tf.contrib.layers.fully_connected(
-                    self.global_desc,
+                self.global_desc = tf.keras.layers.Dense(
                     self.n_thetas * self.n_rhos,
-                    activation_fn=tf.nn.relu,
-                )
-                self.global_desc = tf.contrib.layers.fully_connected(
-                    self.global_desc, self.n_feat, activation_fn=tf.nn.relu
-                )
+                    activation=tf.nn.relu
+                )(self.global_desc)
+                self.global_desc = tf.keras.layers.Dense(
+                    self.n_feat, activation=tf.nn.relu
+                )(self.global_desc)
 
                 # Do a second convolutional layer. input: batch_size, n_feat -- output: batch_size, n_feat
                 if n_conv_layers > 1:
@@ -334,13 +333,13 @@ class MaSIF_site:
                     self.global_desc = tf.gather(
                         self.global_desc, self.indices_tensor
                     )  # batch_size, max_verts, n_feat
-                    W_conv_l2 = tf.get_variable(
+                    W_conv_l2 = tf.compat.v1.get_variable(
                         "W_conv_l2",
                         shape=[
                             self.n_feat * self.n_thetas * self.n_rhos,
                             self.n_thetas * self.n_rhos * self.n_feat,
                         ],
-                        initializer=tf.contrib.layers.xavier_initializer(),
+                        initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"),
                     )
                     b_conv_l2 = tf.Variable(
                         tf.zeros([self.n_thetas * self.n_rhos * self.n_feat]),
@@ -374,13 +373,13 @@ class MaSIF_site:
                         self.global_desc, self.indices_tensor
                     )  # batch_size, max_verts, n_gauss
                     print("global_desc shape: {}".format(self.global_desc.get_shape()))
-                    W_conv_l3 = tf.get_variable(
+                    W_conv_l3 = tf.compat.v1.get_variable(
                         "W_conv_l3",
                         shape=[
                             self.n_thetas * self.n_rhos * self.n_feat,
                             self.n_thetas * self.n_rhos * self.n_feat,
                         ],
-                        initializer=tf.contrib.layers.xavier_initializer(),
+                        initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"),
                     )
                     b_conv_l3 = tf.Variable(
                         tf.zeros([self.n_thetas * self.n_rhos * self.n_feat]),
@@ -411,13 +410,13 @@ class MaSIF_site:
                     self.global_desc = tf.gather(
                         self.global_desc, self.indices_tensor
                     )  # batch_size, max_verts, n_gauss
-                    W_conv_l4 = tf.get_variable(
+                    W_conv_l4 = tf.compat.v1.get_variable(
                         "W_conv_l4",
                         shape=[
                             self.n_thetas * self.n_rhos * self.n_thetas * self.n_rhos,
                             self.n_thetas * self.n_rhos * self.n_thetas * self.n_rhos,
                         ],
-                        initializer=tf.contrib.layers.xavier_initializer(),
+                        initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"),
                     )
                     b_conv_l4 = tf.Variable(
                         tf.zeros(
@@ -449,15 +448,9 @@ class MaSIF_site:
                     self.global_desc = tf.reduce_max(self.global_desc, axis=2)
                     self.global_desc_shape = tf.shape(self.global_desc)
                 # refine global desc with MLP
-                self.global_desc = tf.contrib.layers.fully_connected(
-                    self.global_desc, self.n_thetas, activation_fn=tf.nn.relu
-                )
+                self.global_desc = tf.keras.layers.Dense(self.n_thetas, activation=tf.nn.relu)(self.global_desc)
 
-                # self.labels = tf.expand_dims(self.labels, axis=0)
-                self.logits = tf.contrib.layers.fully_connected(
-                    self.global_desc, self.n_labels, activation_fn=tf.identity
-                )
-                # self.logits = tf.expand_dims(self.logits, axis=0)
+                self.logits = tf.keras.layers.Dense(self.n_labels, activation=tf.identity)(self.global_desc)
                 self.eval_labels = tf.concat(
                     [
                         tf.gather(self.labels, self.pos_idx),
@@ -473,7 +466,7 @@ class MaSIF_site:
                     axis=0,
                 )
                 self.data_loss = tf.nn.sigmoid_cross_entropy_with_logits(
-                    labels=tf.to_float(self.eval_labels), logits=self.eval_logits
+                    labels=tf.cast(self.eval_labels, dtype=tf.float32), logits=self.eval_logits
                 )
 
                 # eval_logits and eval_scores are reordered according to pos and neg_idx.
@@ -492,26 +485,26 @@ class MaSIF_site:
                         learning_rate=0.01, beta1=0.9, beta2=0.99, epsilon=1e-8
                     ).minimize(self.data_loss)
                 else:
-                    self.optimizer = tf.train.AdamOptimizer(
+                    self.optimizer = tf.compat.v1.train.AdamOptimizer(
                         learning_rate=learning_rate
                     ).minimize(self.data_loss)
 
-                self.var_grad = tf.gradients(self.data_loss, tf.trainable_variables())
+                self.var_grad = tf.gradients(self.data_loss, tf.compat.v1.trainable_variables())
                 for k in range(len(self.var_grad)):
                     if self.var_grad[k] is None:
-                        print(tf.trainable_variables()[k])
+                        print(tf.compat.v1.trainable_variables()[k])
                 self.norm_grad = self.frobenius_norm(
                     tf.concat([tf.reshape(g, [-1]) for g in self.var_grad], 0)
                 )
 
                 # Create a session for running Ops on the Graph.
-                config = tf.ConfigProto(allow_soft_placement=True)
+                config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
                 config.gpu_options.allow_growth = True
-                self.session = tf.Session(config=config)
-                self.saver = tf.train.Saver()
+                self.session = tf.compat.v1.Session(config=config)
+                self.saver = tf.compat.v1.train.Saver()
 
                 # Run the Op to initialize the variables.
-                init = tf.global_variables_initializer()
+                init = tf.compat.v1.global_variables_initializer()
                 self.session.run(init)
                 self.count_number_parameters()
 

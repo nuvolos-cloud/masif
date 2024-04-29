@@ -18,12 +18,12 @@ Released under an Apache License 2.0
 """
 
 
-config = tf.ConfigProto()
+config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
-session = tf.Session(config=config)
+session = tf.compat.v1.Session(config=config)
 
 np.random.seed(42)
-tf.random.set_random_seed(42)
+tf.compat.v1.random.set_random_seed(42)
 
 data_dir = "transformation_data/"
 

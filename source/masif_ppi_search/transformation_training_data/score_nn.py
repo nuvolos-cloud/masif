@@ -20,12 +20,12 @@ Released under an Apache License 2.0
 class ScoreNN:
 
     def __init__(self):
-        config = tf.ConfigProto()
+        config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
-        session = tf.Session(config=config)
+        session = tf.compat.v1.Session(config=config)
 
         np.random.seed(42)
-        tf.random.set_random_seed(42)
+        tf.compat.v1.random.set_random_seed(42)
 
         reg = keras.regularizers.l2(l=0.0)
         model = keras.models.Sequential()

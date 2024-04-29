@@ -30,7 +30,7 @@ if not os.path.exists(test_set_out_dir):
     os.makedirs(test_set_out_dir)
 
 
-with tf.Session() as sess:
+with tf.compat.v1.Session() as sess:
     # Build network
     learning_obj = MaSIF_ligand(
         sess,
@@ -44,7 +44,7 @@ with tf.Session() as sess:
     learning_obj.saver.restore(learning_obj.session, output_model)
 
     num_test_samples = 290
-    testing_iterator = testing_data.make_one_shot_iterator()
+    testing_iterator = tf.compat.v1.data.make_one_shot_iterator(testing_data)
     testing_next_element = testing_iterator.get_next()
 
     all_logits_softmax = []
