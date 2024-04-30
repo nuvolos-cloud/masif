@@ -117,9 +117,10 @@ for ppi_pair_id in ppi_pair_list:
 
         # Pad shorter sequences with a placeholder value, e.g., -1 or 0
         padded_sequences = [
-            seq + [-1] * (max_length - len(seq)) for seq in neigh_indices[pid]
+            seq + [0] * (max_length - len(seq)) for seq in neigh_indices[pid]
         ]
-        np.save(my_precomp_dir + pid + "_list_indices", padded_sequences[pid])
+        padded_array = np.array(padded_sequences)
+        np.save(my_precomp_dir + pid + "_list_indices", padded_array)
 
         np.save(my_precomp_dir + pid + "_iface_labels", iface_labels[pid])
         # Save x, y, z
