@@ -232,6 +232,7 @@ def train_masif_site(
         # Run testing cycle.
         for ppi_pair_id in data_dirs:
             mydir = params["masif_precomputation_dir"] + ppi_pair_id + "/"
+            print(f"### Running test cycle for {ppi_pair_id}")
             pdbid = ppi_pair_id.split("_")[0]
             chains1 = ppi_pair_id.split("_")[1]
             if len(ppi_pair_id.split("_")) > 2:
