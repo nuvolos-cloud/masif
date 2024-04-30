@@ -110,7 +110,17 @@ for ppi_pair_id in ppi_pair_list:
         np.save(my_precomp_dir + pid + "_theta_wrt_center", theta[pid])
         np.save(my_precomp_dir + pid + "_input_feat", input_feat[pid])
         np.save(my_precomp_dir + pid + "_mask", mask[pid])
-        np.save(my_precomp_dir + pid + '_list_indices', neigh_indices[pid])
+
+        # Assuming neigh_indices is a list of lists with varying lengths
+        # Find the maximum length of any sequence in neigh_indices[pid]
+        max_length = max(len(seq) for seq in neigh_indices[pid])
+
+        # Pad shorter sequences with a placeholder value, e.g., -1 or 0
+        padded_sequences = [
+            seq + [-1] * (max_length - len(seq)) for seq in neigh_indices[pid]
+        ]
+        np.save(my_precomp_dir + pid + "_list_indices", padded_sequences[pid])
+
         np.save(my_precomp_dir + pid + "_iface_labels", iface_labels[pid])
         # Save x, y, z
         np.save(my_precomp_dir + pid + "_X.npy", verts[pid][:, 0])
