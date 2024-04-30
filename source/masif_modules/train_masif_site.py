@@ -2,8 +2,7 @@ import time
 import os
 from sklearn import metrics
 import numpy as np
-from IPython.core.debugger import set_trace
-from sklearn.metrics import accuracy_score, roc_auc_score
+
 
 # Apply mask to input_feat
 def mask_input_feat(input_feat, mask):
@@ -57,8 +56,6 @@ def train_masif_site(
 
     list_training_loss = []
     list_training_auc = []
-    list_validation_auc = []
-    iter_time = []
     best_val_auc = 0
 
     out_dir = params["model_dir"]
@@ -86,8 +83,7 @@ def train_masif_site(
         list_val_pos_labels = []
         list_val_neg_labels = []
         list_val_names = []
-        list_training_acc = []
-        list_val_acc = []
+
         logfile.write("Starting epoch {}".format(num_iter))
         print("Starting epoch {}".format(num_iter))
         tic = time.time()
@@ -101,7 +97,6 @@ def train_masif_site(
 
         list_test_auc = []
         list_test_names = []
-        list_test_acc = []
         all_test_labels = []
         all_test_scores = []
 
@@ -109,6 +104,7 @@ def train_masif_site(
             mydir = params["masif_precomputation_dir"] + ppi_pair_id + "/"
             pdbid = ppi_pair_id.split("_")[0]
             chains1 = ppi_pair_id.split("_")[1]
+            print(f"### Processing {ppi_pair_id}")
             if len(ppi_pair_id.split("_")) > 2:
                 chains2 = ppi_pair_id.split("_")[2]
             else:
@@ -122,13 +118,16 @@ def train_masif_site(
                 try:
                     iface_labels = np.load(mydir + pid + "_iface_labels.npy")
                 except:
+                    print(f"### Error loading {mydir + pid + '_iface_labels.npy'}")
                     continue
                 if len(iface_labels) > 8000:
+                    print(f"### Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels")
                     continue
                 if (
                     np.sum(iface_labels) > 0.75 * len(iface_labels)
                     or np.sum(iface_labels) < 30
                 ):
+                    print(f"### Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds")
                     continue
                 count_proteins += 1
 
@@ -249,13 +248,16 @@ def train_masif_site(
                 try:
                     iface_labels = np.load(mydir + pid + "_iface_labels.npy")
                 except:
+                    print(f"### Error loading {mydir + pid + '_iface_labels.npy'}")
                     continue
                 if len(iface_labels) > 20000:
+                    print(f"### Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels")
                     continue
                 if (
                     np.sum(iface_labels) > 0.75 * len(iface_labels)
                     or np.sum(iface_labels) < 30
                 ):
+                    print(f"### Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds")
                     continue
                 count_proteins += 1
 
