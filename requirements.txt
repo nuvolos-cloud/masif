@@ -1,5 +1,5 @@
-Python
-PyMesh
+Python~=3.10
+PyMesh>=0.3.0
 reduce
 MSMS
 biopython
@@ -8,5 +8,5 @@ multivalue
 APBS
 open3D
 Pymol
-Tensorflow
+Tensorflow>=2.0
 colour

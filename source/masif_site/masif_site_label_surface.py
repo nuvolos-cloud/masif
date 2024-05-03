@@ -5,6 +5,7 @@ from IPython.core.debugger import set_trace
 from sklearn.metrics import roc_auc_score
 import importlib
 import numpy as np
+import tensorflow as tf
 from default_config.masif_opts import masif_opts
 
 """
@@ -14,6 +15,8 @@ This file is part of MaSIF.
 Released under an Apache License 2.0
 """
 
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+tf.compat.v1.disable_v2_behavior()
 
 params = masif_opts["site"]
 custom_params_file = sys.argv[1]

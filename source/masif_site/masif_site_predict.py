@@ -2,9 +2,9 @@
 import time
 import os
 import numpy as np
-from IPython.core.debugger import set_trace
 import sys
 import importlib
+import tensorflow as tf
 from masif_modules.train_masif_site import run_masif_site
 from default_config.masif_opts import masif_opts
 
@@ -14,6 +14,9 @@ Pablo Gainza - LPDI STI EPFL 2019
 This file is part of MaSIF.
 Released under an Apache License 2.0
 """
+
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+tf.compat.v1.disable_v2_behavior()
 
 # Apply mask to input_feat
 def mask_input_feat(input_feat, mask):

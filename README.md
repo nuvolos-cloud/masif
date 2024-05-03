@@ -23,6 +23,18 @@
 - [Docker container](#Docker-container)
 - [License](#License)
 - [Reference](#Reference)
+
+## 2024 updates for Nuvolos
+
+This repository has been updated to work with Nuvolos. The following changes have been made:
+
+* Python 3.6 has been replaced with Python 3.10
+* PyMesh has been updated to 0.3.1 built for Python 3.10
+* Latest Open3D has been installed
+* Latest APBS and MultiValue has been installed
+* Model training code for `masif_site` and tthe pre-trained model checkpoint have been updated to work with TensorFlow 2.16
+* Fixes for PDB file retrieval and processing
+
 ## Description
 
 MaSIF is a proof-of-concept method to decipher patterns
