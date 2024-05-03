@@ -4,7 +4,9 @@ masif_opts = {}
 # Default directories
 masif_opts["raw_pdb_dir"] = "/files/masif_data/data_preparation/00-raw_pdbs/"
 masif_opts["pdb_chain_dir"] = "/files/masif_data/data_preparation/01-benchmark_pdbs/"
-masif_opts["ply_chain_dir"] = "/files/masif_data/data_preparation/01-benchmark_surfaces/"
+masif_opts[
+    "ply_chain_dir"
+] = "/files/masif_data/data_preparation/01-benchmark_surfaces/"
 masif_opts["tmp_dir"] = tempfile.gettempdir()
 masif_opts["ply_file_template"] = masif_opts["ply_chain_dir"] + "/{}_{}.ply"
 
@@ -37,7 +39,9 @@ masif_opts["ppi_search"]["pos_surf_accept_probability"] = 1.0
 masif_opts["ppi_search"]["pos_interface_cutoff"] = 1.0
 masif_opts["ppi_search"]["range_val_samples"] = 0.9  # 0.9 to 1.0
 masif_opts["ppi_search"]["cache_dir"] = "/files/masif_data/nn_models/sc05/cache/"
-masif_opts["ppi_search"]["model_dir"] = "/files/masif_data/nn_models/sc05/all_feat/model_data/"
+masif_opts["ppi_search"][
+    "model_dir"
+] = "/files/masif_data/nn_models/sc05/all_feat/model_data/"
 masif_opts["ppi_search"]["desc_dir"] = "descriptors/sc05/all_feat/"
 masif_opts["ppi_search"]["gif_descriptors_out"] = "gif_descriptors/"
 # Parameters for shape complementarity calculations.
@@ -56,15 +60,21 @@ masif_opts["site"][
     "masif_precomputation_dir"
 ] = "/files/masif_data/data_preparation/04a-precomputation_9A/precomputation/"
 masif_opts["site"]["range_val_samples"] = 0.9  # 0.9 to 1.0
-masif_opts["site"]["model_dir"] = "/opt/conda/masif/data/masif_site/nn_models/all_feat_3l_v2/model_data/"
+masif_opts["site"][
+    "model_dir"
+] = "/opt/conda/masif/data/masif_site/nn_models/all_feat_3l_v2/model_data/"
 masif_opts["site"]["out_pred_dir"] = "output/all_feat_3l/pred_data/"
 masif_opts["site"]["out_surf_dir"] = "output/all_feat_3l/pred_surfaces/"
 masif_opts["site"]["feat_mask"] = [1.0] * 5
 
 # Neural network ligand application specific parameters.
 masif_opts["ligand"] = {}
-masif_opts["ligand"]["assembly_dir"] = "/files/masif_data/data_preparation/00b-pdbs_assembly"
-masif_opts["ligand"]["ligand_coords_dir"] = "/files/masif_data/data_preparation/00c-ligand_coords"
+masif_opts["ligand"][
+    "assembly_dir"
+] = "/files/masif_data/data_preparation/00b-pdbs_assembly"
+masif_opts["ligand"][
+    "ligand_coords_dir"
+] = "/files/masif_data/data_preparation/00c-ligand_coords"
 masif_opts["ligand"][
     "masif_precomputation_dir"
 ] = "/files/masif_data/data_preparation/04a-precomputation_12A/precomputation/"

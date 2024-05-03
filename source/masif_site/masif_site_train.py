@@ -15,7 +15,7 @@ Released under an Apache License 2.0
 """
 
 # Use keras 2.16 instead of keras 3 for tf.compat.v1.layers.dense()
-os.environ["TF_USE_LEGACY_KERAS"]="1"
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
 tf.compat.v1.disable_v2_behavior()
 params = masif_opts["site"]
 

@@ -121,13 +121,17 @@ def train_masif_site(
                     print(f"### Error loading {mydir + pid + '_iface_labels.npy'}")
                     continue
                 if len(iface_labels) > 8000:
-                    print(f"### Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels")
+                    print(
+                        f"### Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels"
+                    )
                     continue
                 if (
                     np.sum(iface_labels) > 0.75 * len(iface_labels)
                     or np.sum(iface_labels) < 30
                 ):
-                    print(f"### Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds")
+                    print(
+                        f"### Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds"
+                    )
                     continue
                 count_proteins += 1
 
@@ -252,13 +256,17 @@ def train_masif_site(
                     print(f"### Error loading {mydir + pid + '_iface_labels.npy'}")
                     continue
                 if len(iface_labels) > 20000:
-                    print(f"### Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels")
+                    print(
+                        f"### Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels"
+                    )
                     continue
                 if (
                     np.sum(iface_labels) > 0.75 * len(iface_labels)
                     or np.sum(iface_labels) < 30
                 ):
-                    print(f"### Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds")
+                    print(
+                        f"### Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds"
+                    )
                     continue
                 count_proteins += 1
 
