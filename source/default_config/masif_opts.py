@@ -56,7 +56,7 @@ masif_opts["site"][
     "masif_precomputation_dir"
 ] = "/files/masif_data/data_preparation/04a-precomputation_9A/precomputation/"
 masif_opts["site"]["range_val_samples"] = 0.9  # 0.9 to 1.0
-masif_opts["site"]["model_dir"] = "/files/masif_data/nn_models/all_feat_3l/model_data/"
+masif_opts["site"]["model_dir"] = "/opt/conda/masif/data/masif_site/nn_models/all_feat_3l_v2/model_data/"
 masif_opts["site"]["out_pred_dir"] = "output/all_feat_3l/pred_data/"
 masif_opts["site"]["out_surf_dir"] = "output/all_feat_3l/pred_surfaces/"
 masif_opts["site"]["feat_mask"] = [1.0] * 5

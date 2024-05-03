@@ -1,0 +1,20 @@
+training_list: lists/training.txt
+testing_list: lists/testing.txt
+max_shape_size: 100
+n_conv_layers: 3
+max_distance: 9.0
+masif_precomputation_dir: /files/masif_data/data_preparation/04a-precomputation_9A/precomputation/
+range_val_samples: 0.9
+model_dir: /opt/conda/masif/data/masif_site/nn_models/all_feat_3l_v2/model_data/
+out_pred_dir: output/all_feat_3l/pred_data/
+out_surf_dir: output/all_feat_3l/pred_surfaces/
+feat_mask: [1.0, 1.0, 1.0, 1.0, 1.0]
+pids: ['p1', 'p2']
+Starting epoch 0Training on 1A0G_B_ p1
+Epoch ran on 1 proteins
+Per protein AUC mean (training): 0.5072; median: 0.5072 for iter 0
+Per protein AUC mean (validation): nan; median: nan for iter 0
+Per protein AUC mean (test): nan; median: nan for iter 0
+Testing auc (all points): N/AEpoch took 15.416046s
+
+Starting epoch 1Training on 1A0G_B_ p1

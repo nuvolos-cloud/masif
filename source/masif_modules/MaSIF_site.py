@@ -328,12 +328,18 @@ class MaSIF_site:
                 self.global_desc = tf.reshape(
                     self.global_desc, [-1, self.n_thetas * self.n_rhos * self.n_feat]
                 )
-                self.global_desc = tf.keras.layers.Dense(
-                    self.n_thetas * self.n_rhos, activation=tf.nn.relu
-                )(self.global_desc)
-                self.global_desc = tf.keras.layers.Dense(
-                    self.n_feat, activation=tf.nn.relu
-                )(self.global_desc)
+                self.global_desc = tf.compat.v1.layers.dense(
+                    self.global_desc,
+                    self.n_thetas * self.n_rhos,
+                    activation=tf.nn.relu,
+                    name="fully_connected",
+                )
+                self.global_desc = tf.compat.v1.layers.dense(
+                    self.global_desc,
+                    self.n_feat,
+                    activation=tf.nn.relu,
+                    name="fully_connected_1",
+                )
 
                 # Do a second convolutional layer. input: batch_size, n_feat -- output: batch_size, n_feat
                 if n_conv_layers > 1:
@@ -462,13 +468,19 @@ class MaSIF_site:
                     self.global_desc = tf.reduce_max(self.global_desc, axis=2)
                     self.global_desc_shape = tf.shape(self.global_desc)
                 # refine global desc with MLP
-                self.global_desc = tf.keras.layers.Dense(
-                    self.n_thetas, activation=tf.nn.relu
-                )(self.global_desc)
+                self.global_desc = tf.compat.v1.layers.dense(
+                    self.global_desc,
+                    self.n_thetas,
+                    activation=tf.nn.relu,
+                    name="fully_connected_2",
+                )
 
-                self.logits = tf.keras.layers.Dense(
-                    self.n_labels, activation=tf.identity
-                )(self.global_desc)
+                self.logits = tf.compat.v1.layers.dense(
+                    self.global_desc,
+                    self.n_labels,
+                    activation=tf.identity,
+                    name="fully_connected_3",
+                )
                 self.eval_labels = tf.concat(
                     [
                         tf.gather(self.labels, self.pos_idx),
