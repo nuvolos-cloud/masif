@@ -48,6 +48,8 @@ else:
     print("Not enough parameters")
     sys.exit(1)
 
+print(f"### Evaluating predictions: {ppi_pair_ids}")
+
 for ppi_pair_id in ppi_pair_ids:
     fields = ppi_pair_id.split("_")
     pdbid = fields[0]
@@ -70,6 +72,7 @@ for ppi_pair_id in ppi_pair_ids:
             and pdb_chain_id + "_" not in eval_list
             and len(eval_list) > 0
         ):
+            print(f"### {pdb_chain_id} is not in eval list")
             continue
 
         try:
