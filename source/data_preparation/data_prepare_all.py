@@ -4,7 +4,7 @@ import subprocess
 from concurrent.futures import ThreadPoolExecutor
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from default_config.masif_opts import masif_opts
 
 
