@@ -18,6 +18,7 @@ from triangulation.computeCharges import computeCharges, assignChargesToNewMesh
 from triangulation.computeAPBS import computeAPBS
 from triangulation.compute_normal import compute_normal
 
+
 # Compute all helices in the PDB chain.
 def computeHelices(pdbid, pdbfilename, chain_id):
     # Minimum number of residues to be considered a helix: 10

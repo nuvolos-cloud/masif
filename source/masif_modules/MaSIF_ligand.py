@@ -3,7 +3,6 @@ import numpy as np
 
 
 class MaSIF_ligand:
-
     """
     The neural network model.
     """

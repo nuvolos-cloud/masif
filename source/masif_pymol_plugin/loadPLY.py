@@ -27,6 +27,7 @@ colorDict = {
     "gray": [COLOR, 0.9, 0.9, 0.9],
 }
 
+
 # Create a gradient color from color 1 to whitish, to color 2. val goes from 0 (color1) to 1 (color2).
 def color_gradient(vals, color1, color2):
     c1 = Color("white")

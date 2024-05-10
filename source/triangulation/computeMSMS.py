@@ -8,6 +8,7 @@ from default_config.global_vars import msms_bin
 from default_config.masif_opts import masif_opts
 import random
 
+
 # Pablo Gainza LPDI EPFL 2017-2019
 # Calls MSMS and returns the vertices.
 # Special atoms are atoms with a reduced radius.

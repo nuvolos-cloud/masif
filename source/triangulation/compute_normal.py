@@ -12,7 +12,6 @@ from default_config.global_vars import epsilon as eps
 
 
 def compute_normal(vertex, face):
-
     """
     compute_normal - compute the normal of a triangulation
     vertex: 3xn matrix of vertices

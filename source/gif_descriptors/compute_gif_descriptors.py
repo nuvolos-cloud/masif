@@ -8,6 +8,7 @@ import sys
 # Implemented by Pablo Gainza LPDI - EPFL 2016-2019
 # Released under an Apache License 2.0
 
+
 # Compute the histogram of distance-dependent curvature.
 def compute_dfss_histogram(rho, ddc, mask):
     # Bin it

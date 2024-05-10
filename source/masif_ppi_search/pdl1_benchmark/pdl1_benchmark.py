@@ -38,6 +38,7 @@ desc_dir = os.path.join(masif_opts["ppi_search"]["desc_dir"])
 pdb_dir = os.path.join(top_dir, masif_opts["pdb_chain_dir"])
 precomp_dir = os.path.join(top_dir, masif_opts["site"]["masif_precomputation_dir"])
 
+
 # Extract a geodesic patch.
 def get_patch_geo(
     pcd, patch_coords, center, descriptors, outward_shift=0.25, flip=False

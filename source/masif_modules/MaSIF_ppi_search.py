@@ -3,7 +3,6 @@ import numpy as np
 
 
 class MaSIF_ppi_search:
-
     """
     The neural network model to classify two patches into binders or not binders.
     """

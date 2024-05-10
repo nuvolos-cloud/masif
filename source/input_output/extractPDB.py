@@ -3,11 +3,13 @@ extractPDB.py: Extract selected chains from a PDB and save the extracted chains 
 Pablo Gainza - LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
+
 from Bio.PDB import *
 
 from Bio.SeqUtils import IUPACData
 
 PROTEIN_LETTERS = [x.upper() for x in IUPACData.protein_letters_3to1.keys()]
+
 
 # Exclude disordered atoms.
 class NotDisordered(Select):

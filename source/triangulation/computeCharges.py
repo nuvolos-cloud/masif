@@ -18,6 +18,7 @@ from default_config.chemistry import (
     donorAtom,
 )
 
+
 # Compute vertex charges based on hydrogen bond potential.
 # pdb_filename: The filename of the protonated protein.
 # vertices: The surface vertices of the protonated protein

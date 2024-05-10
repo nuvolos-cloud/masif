@@ -1,5 +1,6 @@
 from Bio.PDB import *
 
+
 # Exclude disordered atoms.
 class NotDisordered(Select):
     def accept_atom(self, atom):

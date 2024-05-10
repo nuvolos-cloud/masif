@@ -104,9 +104,9 @@ for i, d in enumerate(data_list):
         (source_patch_rmsds[chosen_alignments] < max_rmsd).astype(int)
     ).reshape(-1, 1)
 
-    all_features[
-        n_samples : n_samples + len(chosen_alignments), :, :
-    ] = features_trimmed
+    all_features[n_samples : n_samples + len(chosen_alignments), :, :] = (
+        features_trimmed
+    )
     all_labels[n_samples : n_samples + len(chosen_alignments)] = labels
     n_samples += len(chosen_alignments)
 

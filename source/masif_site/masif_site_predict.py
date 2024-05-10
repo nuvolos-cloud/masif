@@ -18,6 +18,7 @@ Released under an Apache License 2.0
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
 tf.compat.v1.disable_v2_behavior()
 
+
 # Apply mask to input_feat
 def mask_input_feat(input_feat, mask):
     mymask = np.where(np.array(mask) == 0.0)[0]

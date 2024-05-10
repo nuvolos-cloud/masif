@@ -1,4 +1,5 @@
 """ Data preparation script for masif_site dataset. """
+
 import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
@@ -21,7 +22,17 @@ def run_script(protein_name):
 
 def main():
     # Path to the file containing the list of protein names
-    protein_list_file = "../../data/masif_site/lists/masif_site_only.txt"
+    protein_list_file = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "data",
+            "masif_site",
+            "lists",
+            "masif_site_only.txt",
+        )
+    )
 
     # Get the list of proteins already prepared
     prepared_proteins = os.listdir(masif_opts["site"]["masif_precomputation_dir"])

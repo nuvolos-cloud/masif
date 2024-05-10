@@ -3,7 +3,6 @@ import tensorflow as tf
 
 
 class MaSIF_site:
-
     """
     The neural network model.
     """

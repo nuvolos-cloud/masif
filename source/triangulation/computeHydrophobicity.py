@@ -23,6 +23,7 @@ kd_scale["ASN"] = -3.5
 kd_scale["LYS"] = -3.9
 kd_scale["ARG"] = -4.5
 
+
 # For each vertex in names, compute
 def computeHydrophobicity(names):
     hp = np.zeros(len(names))
