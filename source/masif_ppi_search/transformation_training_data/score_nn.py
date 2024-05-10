@@ -1,16 +1,7 @@
 import tensorflow as tf
-import numpy.matlib
-import os
 import numpy as np
-from IPython.core.debugger import set_trace
-from scipy.spatial import cKDTree
-from sklearn.metrics import roc_auc_score
 from tensorflow import keras
-import time
 
-# import pandas as pd
-import pickle
-import sys
 
 """
 score_nn.py: Class to score protein complex alignments based on a pre-trained neural network (used for MaSIF-search's second stage protocol).
@@ -23,7 +14,7 @@ class ScoreNN:
     def __init__(self):
         config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
-        session = tf.compat.v1.Session(config=config)
+        _ = tf.compat.v1.Session(config=config)
 
         np.random.seed(42)
         tf.compat.v1.random.set_random_seed(42)
@@ -87,7 +78,7 @@ class ScoreNN:
                 log_dir="./logs/nn_score", write_graph=False, write_images=True
             ),
         ]
-        history = self.model.fit(
+        _ = self.model.fit(
             features,
             labels,
             batch_size=32,
@@ -99,6 +90,5 @@ class ScoreNN:
         )
 
     def eval(self, features):
-        # set_trace()
         y_test_pred = self.model.predict(features)
         return y_test_pred

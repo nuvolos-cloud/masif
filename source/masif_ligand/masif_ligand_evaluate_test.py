@@ -1,12 +1,8 @@
 import os
 import numpy as np
-from IPython.core.debugger import set_trace
-import importlib
-import sys
 from default_config.masif_opts import masif_opts
 from masif_modules.MaSIF_ligand import MaSIF_ligand
 from masif_modules.read_ligand_tfrecords import _parse_function
-from sklearn.metrics import confusion_matrix
 import tensorflow as tf
 
 """

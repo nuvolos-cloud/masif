@@ -4,7 +4,6 @@ import sys
 import os
 import time
 import numpy as np
-from IPython.core.debugger import set_trace
 from sklearn import metrics
 import importlib
 from default_config.masif_opts import masif_opts
@@ -105,7 +104,7 @@ for count, ppi_pair_id in enumerate(ppi_list):
             labels = np.load(in_dir + "p1" + "_sc_labels.npy")
             mylabels = labels[0]
             labels = np.median(mylabels, axis=1)
-        except:  # Exception, e:
+        except Exception as e:
             print("Could not open " + in_dir + "p1" + "_sc_labels.npy: " + str(e))
             continue
         print("Number of vertices: {}".format(len(labels)))

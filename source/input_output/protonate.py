@@ -6,8 +6,6 @@ Released under an Apache License 2.0
 """
 
 from subprocess import Popen, PIPE
-from IPython.core.debugger import set_trace
-import os
 
 
 def protonate(in_pdb_file, out_pdb_file):

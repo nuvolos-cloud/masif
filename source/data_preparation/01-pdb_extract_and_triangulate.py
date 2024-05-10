@@ -4,7 +4,6 @@ import os
 import shutil
 from Bio.PDB import *
 import sys
-from IPython.core.debugger import set_trace
 
 # Local includes
 from default_config.masif_opts import masif_opts
@@ -50,13 +49,10 @@ extractPDB(pdb_filename, out_filename1 + ".pdb", chain_ids1)
 print(f"### Extracted PDB file: {out_filename1+'.pdb'}")
 
 # Compute MSMS of surface w/hydrogens,
-try:
-    vertices1, faces1, normals1, names1, areas1 = computeMSMS(
-        out_filename1 + ".pdb", protonate=True
-    )
-    print("### MSMS computed")
-except:
-    set_trace()
+vertices1, faces1, normals1, names1, areas1 = computeMSMS(
+    out_filename1 + ".pdb", protonate=True
+)
+print("### MSMS computed")
 
 # Compute "charged" vertices
 if masif_opts["use_hbond"]:

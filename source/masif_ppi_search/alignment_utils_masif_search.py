@@ -1,5 +1,4 @@
 import numpy as np
-from IPython.core.debugger import set_trace
 import copy
 from Bio.PDB import *
 import os
@@ -287,10 +286,7 @@ def compute_desc_dist_score(
     else:
         target_p = corr[:, 1]
         source_p = corr[:, 0]
-        try:
-            dists_cutoff = target_desc.data[:, target_p] - source_desc.data[:, source_p]
-        except:
-            set_trace()
+        dists_cutoff = target_desc.data[:, target_p] - source_desc.data[:, source_p]
         dists_cutoff = np.sqrt(np.sum(np.square(dists_cutoff.T), axis=1))
         inliers = len(corr)
 

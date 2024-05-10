@@ -4,12 +4,9 @@ import sys
 from open3d import *
 import numpy as np
 import os
-from sklearn.manifold import TSNE
 from Bio.PDB import *
 import copy
-import scipy.sparse as spio
 from default_config.masif_opts import masif_opts
-import sys
 
 """
 second_stage_alignment.py: Second stage alignment code for benchmarking MaSIF-search WITHOUT neural network scoring. 
@@ -290,10 +287,7 @@ def compute_desc_dist_score(
     else:
         target_p = corr[:, 1]
         source_p = corr[:, 0]
-        try:
-            dists_cutoff = target_desc.data[:, target_p] - source_desc.data[:, source_p]
-        except:
-            set_trace()
+        dists_cutoff = target_desc.data[:, target_p] - source_desc.data[:, source_p]
         dists_cutoff = np.sqrt(np.sum(np.square(dists_cutoff.T), axis=1))
         inliers = len(corr)
 
@@ -302,9 +296,6 @@ def compute_desc_dist_score(
     scores_corr_mean = np.mean(np.square(1.0 / dists_cutoff))
 
     return np.array([scores_corr, inliers, scores_corr_mean, scores_corr_cube]).T
-
-
-from IPython.core.debugger import set_trace
 
 
 def subsample_patch_coords(pdb, pid, cv=None):

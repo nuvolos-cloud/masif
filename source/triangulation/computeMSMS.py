@@ -1,4 +1,5 @@
 import os
+import sys
 from subprocess import Popen, PIPE
 
 from input_output.read_msms import read_msms

@@ -4,9 +4,7 @@ masif_opts = {}
 # Default directories
 masif_opts["raw_pdb_dir"] = "/masif_data/data_preparation/00-raw_pdbs/"
 masif_opts["pdb_chain_dir"] = "/masif_data/data_preparation/01-benchmark_pdbs/"
-masif_opts[
-    "ply_chain_dir"
-] = "/masif_data/data_preparation/01-benchmark_surfaces/"
+masif_opts["ply_chain_dir"] = "/masif_data/data_preparation/01-benchmark_surfaces/"
 masif_opts["tmp_dir"] = "/masif_data/tmp/"
 masif_opts["ply_file_template"] = masif_opts["ply_chain_dir"] + "/{}_{}.ply"
 
@@ -56,9 +54,7 @@ masif_opts["site"]["testing_list"] = "lists/testing.txt"
 masif_opts["site"]["max_shape_size"] = 100
 masif_opts["site"]["n_conv_layers"] = 3
 masif_opts["site"]["max_distance"] = 9.0  # Radius for the neural network.
-masif_opts["site"][
-    "masif_precomputation_dir"
-] = "/masif_data/precomputation/"
+masif_opts["site"]["masif_precomputation_dir"] = "/masif_data/precomputation/"
 masif_opts["site"]["range_val_samples"] = 0.9  # 0.9 to 1.0
 masif_opts["site"][
     "model_dir"

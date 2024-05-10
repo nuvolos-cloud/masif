@@ -3,7 +3,6 @@ import sys
 import pymesh
 import os
 import numpy as np
-from IPython.core.debugger import set_trace
 import importlib
 
 from scipy.spatial import cKDTree
@@ -106,18 +105,12 @@ for count, ppi_pair_id in enumerate(os.listdir(parent_in_dir)):
     d, r = kdt.query(v1)
     # Contact points: those within a cutoff distance.
     contact_points = np.where(d < params["pos_interface_cutoff"])[0]
-    try:
-        k1 = l[contact_points]
-    except:
-        set_trace()
+    k1 = l[contact_points]
     k2 = r[contact_points]
 
     # For negatives, get points in v2 far from p1.
-    try:
-        kdt = cKDTree(v1)
-        dneg, rneg = kdt.query(v2)
-    except:
-        set_trace()
+    kdt = cKDTree(v1)
+    dneg, rneg = kdt.query(v2)
     k_neg2 = np.where(dneg > params["pos_interface_cutoff"])[0]
 
     assert len(k1) == len(k2)

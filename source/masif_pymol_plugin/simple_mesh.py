@@ -57,10 +57,7 @@ class Simple_mesh:
         # Read faces.
         face_line_start = line_ix
         for i in range(face_line_start, face_line_start + self.num_faces):
-            try:
-                fields = lines[i].split(" ")
-            except:
-                ipdb.set_trace()
+            fields = lines[i].split(" ")
             face = [int(x) for x in fields[1:]]
             self.faces.append(face)
         self.faces = np.array(self.faces)

@@ -3,7 +3,7 @@
 # Released under an Apache License 2.0
 
 import os
-from IPython.core.debugger import set_trace
+import sys
 
 epsilon = 1.0e-6
 
@@ -11,7 +11,6 @@ msms_bin = ""
 if "MSMS_BIN" in os.environ:
     msms_bin = os.environ["MSMS_BIN"]
 else:
-    set_trace()
     print("ERROR: MSMS_BIN not set. Variable should point to MSMS program.")
     sys.exit(1)
 

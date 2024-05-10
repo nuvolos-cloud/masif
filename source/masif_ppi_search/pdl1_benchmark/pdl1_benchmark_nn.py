@@ -1,17 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 import pymesh
-from IPython.core.debugger import set_trace
 from scipy.spatial import cKDTree
 import time
 import os
 import numpy as np
-import os
-import matplotlib.pyplot as plt
-import glob
 from Bio.PDB import *
-import copy
-import scipy.sparse as spio
 import sys
 
 # import the right version of open3d

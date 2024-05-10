@@ -1,7 +1,6 @@
 # Header variables and parameters.
 import os
 import numpy as np
-from IPython.core.debugger import set_trace
 import importlib
 import sys
 from default_config.masif_opts import masif_opts

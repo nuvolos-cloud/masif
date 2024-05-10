@@ -133,8 +133,6 @@ class MaSIF_site:
         return conv_feat
 
     def compute_data_loss(self, neg_thresh=1e1):
-        pos_thresh = 4.0
-        neg_thresh = 0.0
         pos_labels = self.labels[:, 0]
         n_pos = tf.reduce_sum(pos_labels)
         pos_scores = tf.multiply(
@@ -157,7 +155,6 @@ class MaSIF_site:
         max_rho,
         n_thetas=16,
         n_rhos=5,
-        n_gamma=1.0,
         learning_rate=1e-3,
         n_rotations=16,
         idx_gpu="/device:GPU:0",
@@ -301,7 +298,7 @@ class MaSIF_site:
                             self.n_thetas * self.n_rhos,
                             self.n_thetas * self.n_rhos,
                         ],
-                        initializer=tf.initializers.GlorotUniform(),
+                        initializer=tf.keras.initializers.GlorotUniform(),
                     )
 
                     rho_coords = self.rho_coords

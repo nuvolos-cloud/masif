@@ -1,12 +1,9 @@
 #!/usr/bin/python
 import numpy as np
 import os
-import Bio
 import shutil
 from Bio.PDB import *
 import sys
-import importlib
-from IPython.core.debugger import set_trace
 
 # Local includes
 from default_config.masif_opts import masif_opts
@@ -15,7 +12,6 @@ from triangulation.fixmesh import fix_mesh
 import pymesh
 from input_output.extractHelix import extractHelix
 from input_output.save_ply import save_ply
-from input_output.read_ply import read_ply
 from input_output.protonate import protonate
 from triangulation.computeHydrophobicity import computeHydrophobicity
 from triangulation.computeCharges import computeCharges, assignChargesToNewMesh

@@ -1,17 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 import pymesh
-from IPython.core.debugger import set_trace
 import time
 import os
 from default_config.masif_opts import masif_opts
 import numpy as np
-import os
-import matplotlib.pyplot as plt
-import glob
 from Bio.PDB import *
-import copy
-import scipy.sparse as spio
 import sys
 
 start_time = time.time()
@@ -59,10 +53,7 @@ def get_patch_geo(
     """
 
     idx = patch_coords[center]
-    try:
-        pts = np.asarray(pcd.points)[idx, :]
-    except:
-        set_trace()
+    pts = np.asarray(pcd.points)[idx, :]
     nrmls = np.asarray(pcd.normals)[idx, :]
     # Expand the surface in the direction of the normals.
     pts = pts + outward_shift * nrmls
@@ -362,10 +353,7 @@ def compute_desc_dist_score(
     else:
         target_p = corr[:, 1]
         source_p = corr[:, 0]
-        try:
-            dists_cutoff = target_desc.data[:, target_p] - source_desc.data[:, source_p]
-        except:
-            set_trace()
+        dists_cutoff = target_desc.data[:, target_p] - source_desc.data[:, source_p]
         dists_cutoff = np.sqrt(np.sum(np.square(dists_cutoff.T), axis=1))
         inliers = len(corr)
 

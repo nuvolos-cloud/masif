@@ -1,14 +1,9 @@
 # coding: utf-8
-# ## Imports and helper functions
-from IPython.core.debugger import set_trace
+# ## Imports and helper functionsset_trace
 import pymesh
-import time
 import numpy as np
-
+from scipy.spatial import cKDTree
 from geometry.compute_polar_coordinates import compute_polar_coordinates
-from input_output.save_ply import save_ply
-
-from sklearn import metrics
 
 
 def read_data_from_surface(ply_fn, params):
@@ -112,7 +107,6 @@ def extract_patch_and_coord(
     D = np.squeeze(np.asarray(coord[np.int(vix), : coord.shape[1] // 2].todense()))
     j = np.where((D < max_distance) & (D > 0))[0]
     max_dist_tmp = max_distance
-    old_j = len(j)
     while len(j) > max_vertices:
         max_dist_tmp = max_dist_tmp * 0.95
         j = np.where((D < max_dist_tmp) & (D > 0))[0]
@@ -140,8 +134,6 @@ def extract_patch_and_coord(
     else:
         return patch, coord
 
-
-from scipy.spatial import cKDTree
 
 # neigh1 and neigh2 are the precomputed indices; rho1 and rho2 their distances.
 def compute_shape_complementarity(
@@ -225,7 +217,6 @@ def compute_shape_complementarity(
 
         patch_rho1 = np.array(rho1[cv1_ix])[patch_idxs1]
         for ring in range(num_rings):
-            scale = scales[ring]
             members = np.where(
                 (patch_rho1 >= scales[ring]) & (patch_rho1 < scales[ring + 1])
             )
@@ -249,7 +240,6 @@ def compute_shape_complementarity(
         # Apply mask to patch rho coordinates.
         patch_rho2 = np.array(rho2[cv2_ix])[patch_idxs2]
         for ring in range(num_rings):
-            scale = scales[ring]
             members = np.where(
                 (patch_rho2 >= scales[ring]) & (patch_rho2 < scales[ring + 1])
             )

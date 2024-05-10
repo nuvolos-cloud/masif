@@ -2,6 +2,7 @@ import time
 import os
 from sklearn import metrics
 import numpy as np
+import tensorflow as tf
 
 
 # Apply mask to input_feat
@@ -23,6 +24,7 @@ def pad_indices(indices, max_verts):
 def run_masif_site(
     params, learning_obj, rho_wrt_center, theta_wrt_center, input_feat, mask, indices
 ):
+
     indices = pad_indices(indices, mask.shape[1])
     mask = np.expand_dims(mask, 2)
     feed_dict = {
@@ -48,9 +50,8 @@ def train_masif_site(
     params,
     batch_size=100,
     num_iterations=100,
-    num_iter_test=1000,
-    batch_size_val_test=50,
 ):
+    writer = tf.summary.create_file_writer(params["tensorboard_log_dir"])
 
     # Open training list.
 
@@ -198,6 +199,11 @@ def train_masif_site(
                         ],
                         feed_dict=feed_dict,
                     )
+                    # Log validation loss to TensorBoard
+                    with writer.as_default():
+                        tf.summary.scalar(
+                            "validation_loss", training_loss, step=num_iter
+                        )
                     auc = metrics.roc_auc_score(eval_labels[:, 0], score)
                     list_val_pos_labels.append(np.sum(iface_labels))
                     list_val_neg_labels.append(len(iface_labels) - np.sum(iface_labels))
@@ -224,6 +230,11 @@ def train_masif_site(
                         ],
                         feed_dict=feed_dict,
                     )
+                    # Log training loss and gradient norm to TensorBoard
+                    with writer.as_default():
+                        tf.summary.scalar("training_loss", training_loss, step=num_iter)
+                        tf.summary.scalar("norm_grad", norm_grad, step=num_iter)
+
                     all_training_labels = np.concatenate(
                         [all_training_labels, eval_labels[:, 0]]
                     )
@@ -349,5 +360,7 @@ def train_masif_site(
             np.save(out_dir + "test_labels.npy", all_test_labels)
             np.save(out_dir + "test_scores.npy", all_test_scores)
             np.save(out_dir + "test_names.npy", list_test_names)
+
+    tf.saved_model.save(learning_obj.session, out_dir + "saved_model")
 
     logfile.close()

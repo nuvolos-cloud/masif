@@ -1,7 +1,6 @@
 import pymesh
 import os
 import sys
-from IPython.core.debugger import set_trace
 from sklearn.metrics import roc_auc_score
 import importlib
 import numpy as np
@@ -130,7 +129,7 @@ for ppi_pair_id in ppi_pair_ids:
             mymesh,
             *mymesh.get_attribute_names(),
             use_float=True,
-            ascii=True
+            ascii=True,
         )
         print(
             "Successfully saved file " + params["out_surf_dir"] + pdb_chain_id + ".ply"

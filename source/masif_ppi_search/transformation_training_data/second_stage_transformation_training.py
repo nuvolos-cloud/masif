@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from IPython.core.debugger import set_trace
 
 # from transformation_training_data.second_stage_transformation_training_helper import *
 from second_stage_transformation_training_helper import *
@@ -8,14 +7,10 @@ from second_stage_transformation_training_helper import *
 import sys
 from open3d import *
 
-# import ipdb
 import numpy as np
 import os
 from Bio.PDB import *
-import copy
-import scipy.sparse as spio
 from default_config.masif_opts import masif_opts
-import sys
 from scipy.spatial import cKDTree
 
 """

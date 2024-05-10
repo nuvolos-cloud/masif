@@ -1,11 +1,7 @@
 import time
-import math
 from sklearn import metrics
 import numpy as np
 import sys
-import os
-from IPython.core.debugger import set_trace
-from sklearn.metrics import accuracy_score, roc_auc_score
 
 # Features and theta are flipped for the binder in construct_batch (except for hydrophobicity).
 def construct_batch(
@@ -23,7 +19,6 @@ def construct_batch(
     neg_theta_wrt_center,
     neg_input_feat,
     neg_mask,
-    c_neg_training_idx_2=None,
 ):
 
     batch_rho_coords_binder = np.expand_dims(
@@ -216,7 +211,6 @@ def train_ppi_search(
     logfile.write("Number of testing negative shapes: {}\n".format(len(neg_test_idx)))
 
     list_training_loss = []
-    list_training_norm_grad = []
     iter_time = []
     best_val_auc = 0
 
@@ -225,29 +219,8 @@ def train_ppi_search(
 
     logfile.write("Number of iterations: {}\n".format(num_iterations))
 
-    iter_training_loss = []
     iter_pos_score = []
     iter_neg_score = []
-
-    test_iterations_log = [
-        0,
-        1,
-        2,
-        4,
-        8,
-        16,
-        32,
-        64,
-        128,
-        256,
-        512,
-        1024,
-        2048,
-        4096,
-        8192,
-        16384,
-        32178,
-    ]
 
     tic = time.time()
     for num_iter in range(num_iterations):

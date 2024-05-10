@@ -1,6 +1,5 @@
 import os
 import numpy as np
-from IPython.core.debugger import set_trace
 from default_config.masif_opts import masif_opts
 import sys
 

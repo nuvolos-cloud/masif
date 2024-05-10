@@ -1,20 +1,12 @@
 #!/usr/bin/env python
-from IPython.core.debugger import set_trace
 
 # coding: utf-8
-import sys
 from open3d import *
 
 # import ipdb
 import numpy as np
-import os
-from sklearn.manifold import TSNE
 from Bio.PDB import *
 import copy
-import scipy.sparse as spio
-from default_config.masif_opts import masif_opts
-import sys
-from scipy.spatial import cKDTree
 
 """
 second_stage_transformation_training_helper.py: Helper functions for the second strage transformation data generation.
@@ -103,12 +95,9 @@ def multidock(
     all_source_patch = []
     all_source_patch_descs = []
     for pt in cand_pts:
-        try:
-            source_patch, source_patch_descs = get_patch_geo(
-                source_pcd, source_patch_coords, pt, source_descs
-            )
-        except:
-            set_trace()
+        source_patch, source_patch_descs = get_patch_geo(
+            source_pcd, source_patch_coords, pt, source_descs
+        )
         result = registration_ransac_based_on_feature_matching(
             source_patch,
             target_pcd,
@@ -158,7 +147,6 @@ def test_alignments(
     )
     structure_ca_coord_pcd = PointCloud()
     structure_ca_coord_pcd.points = Vector3dVector(structure_ca_coords)
-    structure_ca_coord_pcd_notTransformed = copy.deepcopy(structure_ca_coord_pcd)
     structure_ca_coord_pcd.transform(random_transformation)
     structure_ca_coord_pcd.transform(transformation)
 
@@ -167,7 +155,6 @@ def test_alignments(
     )
     structure_coord_pcd = PointCloud()
     structure_coord_pcd.points = Vector3dVector(structure_coords)
-    structure_coord_pcd_notTransformed = copy.deepcopy(structure_coord_pcd)
     structure_coord_pcd.transform(random_transformation)
     structure_coord_pcd.transform(transformation)
 
@@ -177,10 +164,6 @@ def test_alignments(
     d_nn, i_nn = target_pcd_tree.query(
         np.asarray(structure_coord_pcd.points), k=1, distance_upper_bound=radius
     )
-    clashing_ca = np.sum(d_nn_ca <= radius)
-    clashing = np.sum(d_nn <= radius)
-    total_ca_atoms = np.asarray(structure_ca_coord_pcd.points).shape[0]
-    total_atoms = np.asarray(structure_coord_pcd.points).shape[0]
 
     d_nn_interface, i_nn_interface = target_pcd_tree.query(
         np.asarray(structure_coord_pcd.points), k=1, distance_upper_bound=interface_dist

@@ -6,10 +6,6 @@ with warnings.catch_warnings():
 
 import os
 import numpy as np
-import numpy.matlib as matlib
-from IPython.core.debugger import set_trace
-import importlib
-import sys
 from default_config.masif_opts import masif_opts
 
 # Apply mask to input_feat
