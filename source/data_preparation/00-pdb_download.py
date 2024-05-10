@@ -1,8 +1,6 @@
 #!/usr/bin/python
-import Bio
 from Bio.PDB import *
 import sys
-import importlib
 import os
 
 from default_config.masif_opts import masif_opts

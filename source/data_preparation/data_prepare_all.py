@@ -2,6 +2,11 @@
 import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
+
+# Add the ../ directory to the path
+import sys
+
+sys.path.append("../")
 from default_config.masif_opts import masif_opts
 
 
