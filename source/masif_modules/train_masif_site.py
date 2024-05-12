@@ -202,7 +202,7 @@ def train_masif_site(
                     # Log validation loss to TensorBoard
                     with writer.as_default():
                         tf.summary.scalar(
-                            "validation_loss", training_loss, step=num_iter
+                            "validation_loss", np.mean(training_loss), step=num_iter
                         )
                     auc = metrics.roc_auc_score(eval_labels[:, 0], score)
                     list_val_pos_labels.append(np.sum(iface_labels))
@@ -232,7 +232,7 @@ def train_masif_site(
                     )
                     # Log training loss and gradient norm to TensorBoard
                     with writer.as_default():
-                        tf.summary.scalar("training_loss", training_loss, step=num_iter)
+                        tf.summary.scalar("training_loss", np.mean(training_loss), step=num_iter)
                         tf.summary.scalar("norm_grad", norm_grad, step=num_iter)
 
                     all_training_labels = np.concatenate(
