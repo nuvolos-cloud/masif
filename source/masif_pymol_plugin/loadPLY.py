@@ -137,7 +137,6 @@ def load_ply(
 
     # Draw vertices
     obj = []
-    color = "green"
 
     for v_ix in range(len(verts)):
         vert = verts[v_ix]

@@ -9,6 +9,8 @@ masif_opts["log_level"] = logging.INFO
 masif_opts["log_format"] = "%(asctime)s - %(levelname)s - %(message)s"
 masif_opts["log_folder"] = "/masif_data/logs/"
 
+os.makedirs(masif_opts["log_folder"], exist_ok=True)
+
 # Logging configuration with a rotating file handler, rotated every day.
 log_file = os.path.join(masif_opts["log_folder"], "masif.log")
 handler = TimedRotatingFileHandler(log_file, when="midnight", interval=1, backupCount=7)
