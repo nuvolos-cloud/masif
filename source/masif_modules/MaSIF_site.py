@@ -1,5 +1,8 @@
+import logging
 import numpy as np
 import tensorflow as tf
+
+logger = logging.getLogger(__name__)
 
 
 class MaSIF_site:
@@ -12,13 +15,13 @@ class MaSIF_site:
         for variable in tf.compat.v1.trainable_variables():
             # shape is an array of tf.Dimension
             shape = variable.get_shape()
-            print(variable)
+            logger.debug(variable)
             variable_parameters = 1
             for dim in shape:
                 variable_parameters *= int(dim)
-            print(variable_parameters)
+            logger.debug(variable_parameters)
             total_parameters += variable_parameters
-        print("Total number parameters: %d" % total_parameters)
+        logger.info("Total number parameters: %d" % total_parameters)
 
     def frobenius_norm(self, tensor):
         square_tensor = tf.square(tensor)
@@ -56,7 +59,7 @@ class MaSIF_site:
 
         coords = np.concatenate((grid_rho_[None, :], grid_theta_[None, :]), axis=0)
         coords = coords.T  # every row contains the coordinates of a grid intersection
-        print(coords.shape)
+        logger.debug(coords.shape)
         return coords
 
     def inference(
@@ -384,7 +387,9 @@ class MaSIF_site:
                     self.global_desc = tf.gather(
                         self.global_desc, self.indices_tensor
                     )  # batch_size, max_verts, n_gauss
-                    print("global_desc shape: {}".format(self.global_desc.get_shape()))
+                    logger.info(
+                        "global_desc shape: {}".format(self.global_desc.get_shape())
+                    )
                     W_conv_l3 = tf.compat.v1.get_variable(
                         "W_conv_l3",
                         shape=[
@@ -507,7 +512,7 @@ class MaSIF_site:
                 if optimizer_method == "AMSGrad":
                     from monet_modules import AMSGrad
 
-                    print("Using AMSGrad as the optimizer")
+                    logger.info("Using AMSGrad as the optimizer")
                     self.optimizer = AMSGrad.AMSGrad(
                         learning_rate=0.01, beta1=0.9, beta2=0.99, epsilon=1e-8
                     ).minimize(self.data_loss)
@@ -521,7 +526,7 @@ class MaSIF_site:
                 )
                 for k in range(len(self.var_grad)):
                     if self.var_grad[k] is None:
-                        print(tf.compat.v1.trainable_variables()[k])
+                        logger.debug(tf.compat.v1.trainable_variables()[k])
                 self.norm_grad = self.frobenius_norm(
                     tf.concat([tf.reshape(g, [-1]) for g in self.var_grad], 0)
                 )

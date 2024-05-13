@@ -1,8 +1,9 @@
 # Header variables and parameters.
 import os
-import numpy as np
 import importlib
 import sys
+import logging
+import numpy as np
 from default_config.masif_opts import masif_opts
 import tensorflow as tf
 
@@ -12,6 +13,8 @@ Pablo Gainza - LPDI STI EPFL 2019
 This file is part of MaSIF.
 Released under an Apache License 2.0
 """
+
+logger = logging.getLogger(__name__)
 
 # Use keras 2.16 instead of keras 3 for tf.compat.v1.layers.dense()
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
@@ -24,7 +27,7 @@ if len(sys.argv) > 1:
     custom_params = custom_params.custom_params
 
     for key in custom_params:
-        print("Setting {} to {} ".format(key, custom_params[key]))
+        logger.info("Setting {} to {} ".format(key, custom_params[key]))
         params[key] = custom_params[key]
 
 
@@ -64,12 +67,12 @@ else:
 # train
 from masif_modules.train_masif_site import train_masif_site
 
-print(params["feat_mask"])
+logger.debug(params["feat_mask"])
 if not os.path.exists(params["model_dir"]):
     os.makedirs(params["model_dir"])
 else:
     # Load existing network.
-    print(f"### Reading pre-trained network from {params['model_dir']+'model'}")
+    logger.info(f"Reading pre-trained network from {params['model_dir']+'model'}")
     learning_obj.saver.restore(learning_obj.session, params["model_dir"] + "model")
 
 train_masif_site(learning_obj, params)

@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 import sys
+import copy
+import logging
+import os
+import time
+
 from open3d import *
 import numpy as np
-import os
 from Bio.PDB import *
-import copy
+
 from default_config.masif_opts import masif_opts
 
 """
@@ -24,13 +28,17 @@ Pablo Gainza  and Freyr Sverrisson- LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
 
-print(sys.argv)
+logger = logging.getLogger(__name__)
+
+logger.info(f"Starting second stage alignment for {sys.argv}")
 if len(sys.argv) != 7 or (sys.argv[5] != "masif" and sys.argv[5] != "gif"):
-    print("Usage: {} data_dir K ransac_iter num_success gif|masif".format(sys.argv[0]))
-    print("data_dir: Location of data directory.")
-    print("K: Number of descriptors to run")
-    print("ransac_iter: number of ransac iterations.")
-    print("num_success: true alignment within short list of size num_success")
+    logger.info(
+        "Usage: {} data_dir K ransac_iter num_success gif|masif".format(sys.argv[0])
+    )
+    logger.info("data_dir: Location of data directory.")
+    logger.info("K: Number of descriptors to run")
+    logger.info("ransac_iter: number of ransac iterations.")
+    logger.info("num_success: true alignment within short list of size num_success")
     sys.exit(1)
 
 data_dir = sys.argv[1]
@@ -333,7 +341,7 @@ p2_names = []
 
 # Read all of p2. p2 will have straight descriptors.
 for i, pdb in enumerate(rand_list):
-    print("Running on {}".format(pdb))
+    logger.info("Running on {}".format(pdb))
     pdb_id = pdb.split("_")[0]
     chains = pdb.split("_")[1:]
     # Descriptors for global matching.
@@ -355,9 +363,6 @@ for i, pdb in enumerate(rand_list):
     p2_names.append(pdb)
 
 
-import time
-import scipy.spatial
-
 # Read all of p1, the target. p1 will have flipped descriptors.
 
 all_positive_scores = []
@@ -369,7 +374,7 @@ all_rankings_desc = []
 all_time_global = []
 for target_ix, target_pdb in enumerate(rand_list):
     tic = time.time()
-    print(target_pdb)
+    logger.info(target_pdb)
     target_pdb_id = target_pdb.split("_")[0]
     chains = target_pdb.split("_")[1:]
 
@@ -523,19 +528,19 @@ for target_ix, target_pdb in enumerate(rand_list):
     if found:
         count_found += 1
         all_rankings_desc.append(myrank_desc)
-        print(myrank_desc)
+        logger.info(myrank_desc)
     else:
-        print("N/D")
+        logger.info("N/D")
 
     all_positive_rmsd.append(pos_rmsd)
     all_positive_scores.append(pos_scores)
     all_negative_scores.append(neg_scores)
-    print("Took {:.2f}s".format(time_global))
+    logger.info("Took {:.2f}s".format(time_global))
     all_time_global.append(time_global)
     # Go through every top descriptor.
 
 
-print("All alignments took {}".format(np.sum(all_time_global)))
+logger.info("All alignments took {}".format(np.sum(all_time_global)))
 
 
 all_pos = []
@@ -555,7 +560,7 @@ rmsds = []
 
 for pdb_ix in range(len(all_positive_scores)):
     if len(all_positive_scores[pdb_ix]) == 0:
-        print("N/D")
+        logger.info("N/D")
         unranked += 1
     else:
         pos_scores = [x[0] for x in all_positive_scores[pdb_ix]]
@@ -566,11 +571,11 @@ for pdb_ix in range(len(all_positive_scores)):
 
         number_better_than_best_pos = np.sum(neg_scores > best_pos_score) + 1
         if number_better_than_best_pos > num_success:
-            print("{} N/D".format(rand_list[pdb_ix]))
+            logger.info("{} N/D".format(rand_list[pdb_ix]))
             unranked += 1
         else:
             rmsds.append(best_rmsd)
-            print(
+            logger.info(
                 "{} {} out of {} -- pos scores: {}".format(
                     rand_list[pdb_ix],
                     number_better_than_best_pos,
@@ -581,22 +586,22 @@ for pdb_ix in range(len(all_positive_scores)):
             ranks.append(number_better_than_best_pos)
 
 ranks = np.array(ranks)
-print(
+logger.info(
     "Number in top 100 {} out of {}".format(
         np.sum(ranks <= 100), len(all_positive_scores)
     )
 )
-print(
+logger.info(
     "Number in top 10 {} out of {}".format(
         np.sum(ranks <= 10), len(all_positive_scores)
     )
 )
-print(
+logger.info(
     "Number in top 1 {} out of {}".format(np.sum(ranks <= 1), len(all_positive_scores))
 )
-print("Median rank for correctly ranked ones: {}".format(np.median(ranks)))
-print("Mean rank for correctly ranked ones: {}".format(np.mean(ranks)))
-print(
+logger.info("Median rank for correctly ranked ones: {}".format(np.median(ranks)))
+logger.info("Mean rank for correctly ranked ones: {}".format(np.mean(ranks)))
+logger.info(
     "Number failed {} out of {}".format(np.median(unranked), len(all_positive_scores))
 )
 

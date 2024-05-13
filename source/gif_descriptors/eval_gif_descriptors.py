@@ -4,12 +4,15 @@
 # Released under an Apache License 2.0
 
 import os
-import numpy as np
 import sys
 import importlib
-import ipdb
+import logging
+import numpy as np
 from sklearn import metrics
 from default_config.masif_opts import masif_opts
+
+
+logger = logging.getLogger(__name__)
 
 
 def compute_roc_auc(pos, neg):
@@ -51,7 +54,7 @@ custom_params = importlib.import_module(custom_params_file, package=None)
 custom_params = custom_params.custom_params
 
 for key in custom_params:
-    print("Setting {} to {} ".format(key, custom_params[key]))
+    logger.info("Setting {} to {} ".format(key, custom_params[key]))
     params[key] = custom_params[key]
 
 out_dir = params["gif_eval_out"]
@@ -92,6 +95,6 @@ for ix, idx in enumerate(test_idx):
     neg_dists.append(dist)
 
 auc = compute_roc_auc(pos_dists, neg_dists)
-print("GIF descriptors ROC AUC: {}".format(1 - auc))
+logger.info("GIF descriptors ROC AUC: {}".format(1 - auc))
 np.save(out_dir + "/pos_dists.npy", pos_dists)
 np.save(out_dir + "/neg_dists.npy", neg_dists)

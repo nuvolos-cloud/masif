@@ -1,9 +1,10 @@
 # Header variables and parameters.
 import time
 import os
-import numpy as np
 import sys
 import importlib
+import logging
+import numpy as np
 import tensorflow as tf
 from masif_modules.train_masif_site import run_masif_site
 from default_config.masif_opts import masif_opts
@@ -14,6 +15,8 @@ Pablo Gainza - LPDI STI EPFL 2019
 This file is part of MaSIF.
 Released under an Apache License 2.0
 """
+
+logger = logging.getLogger(__name__)
 
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
 tf.compat.v1.disable_v2_behavior()
@@ -31,7 +34,7 @@ custom_params = importlib.import_module(custom_params_file, package=None)
 custom_params = custom_params.custom_params
 
 for key in custom_params:
-    print("Setting {} to {} ".format(key, custom_params[key]))
+    logger.info("Setting {} to {} ".format(key, custom_params[key]))
     params[key] = custom_params[key]
 
 
@@ -64,7 +67,7 @@ learning_obj = MaSIF_site(
     feat_mask=params["feat_mask"],
     n_conv_layers=params["n_conv_layers"],
 )
-print("Restoring model from: " + params["model_dir"] + "model")
+logger.info("Restoring model from: " + params["model_dir"] + "model")
 learning_obj.saver.restore(learning_obj.session, params["model_dir"] + "model")
 
 if not os.path.exists(params["out_pred_dir"]):
@@ -72,7 +75,7 @@ if not os.path.exists(params["out_pred_dir"]):
 
 idx_count = 0
 for ppi_pair_id in ppi_pair_ids:
-    print(ppi_pair_id)
+    logger.info(f"Predicting for {ppi_pair_id}")
     in_dir = parent_in_dir + ppi_pair_id + "/"
 
     fields = ppi_pair_id.split("_")
@@ -96,12 +99,14 @@ for ppi_pair_id in ppi_pair_ids:
         ):
             continue
 
-        print("Evaluating {}".format(pdb_chain_id))
+        logger.info("Evaluating {}".format(pdb_chain_id))
 
         try:
             rho_wrt_center = np.load(in_dir + pid + "_rho_wrt_center.npy")
-        except:
-            print("File not found: {}".format(in_dir + pid + "_rho_wrt_center.npy"))
+        except Exception as e:
+            logger.exception(
+                "File not found: {}".format(in_dir + pid + "_rho_wrt_center.npy"), e
+            )
             continue
         theta_wrt_center = np.load(in_dir + pid + "_theta_wrt_center.npy")
         input_feat = np.load(in_dir + pid + "_input_feat.npy")
@@ -112,7 +117,7 @@ for ppi_pair_id in ppi_pair_ids:
         )
         labels = np.zeros((len(mask)))
 
-        print("Total number of patches:{} \n".format(len(mask)))
+        logger.info("Total number of patches:{} \n".format(len(mask)))
 
         tic = time.time()
         scores = run_masif_site(
@@ -125,13 +130,24 @@ for ppi_pair_id in ppi_pair_ids:
             indices,
         )
         toc = time.time()
-        print(
+        logger.info(
             "Total number of patches for which scores were computed: {}\n".format(
                 len(scores[0])
             )
         )
-        print("GPU time (real time, not actual GPU time): {:.3f}s".format(toc - tic))
+        logger.info(
+            "GPU time (real time, not actual GPU time): {:.3f}s".format(toc - tic)
+        )
         np.save(
             params["out_pred_dir"] + "/pred_" + pdbid + "_" + chains[ix] + ".npy",
             scores,
+        )
+        logger.info(
+            "Saved to: "
+            + params["out_pred_dir"]
+            + "/pred_"
+            + pdbid
+            + "_"
+            + chains[ix]
+            + ".npy"
         )

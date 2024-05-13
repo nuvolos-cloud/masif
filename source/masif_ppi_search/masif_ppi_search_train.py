@@ -1,4 +1,5 @@
 # Header variables and parameters.
+import logging
 import warnings
 
 with warnings.catch_warnings():
@@ -20,6 +21,8 @@ masif_ppi_search_train.py: Entry function to train the MaSIF-search neural netwo
 Pablo Gainza - LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
+
+logger = logging.getLogger(__name__)
 
 params = masif_opts["ppi_search"]
 
@@ -66,7 +69,7 @@ learning_obj = MaSIF_ppi_search(
 # Compute the list of binders.
 
 
-print(params["feat_mask"])
+logger.debug(params["feat_mask"])
 
 if not os.path.exists(params["model_dir"]):
     os.makedirs(params["model_dir"])

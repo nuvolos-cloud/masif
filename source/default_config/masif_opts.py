@@ -1,6 +1,24 @@
-import tempfile
+import os
+import logging
+from logging.handlers import TimedRotatingFileHandler
+
 
 masif_opts = {}
+
+masif_opts["log_level"] = logging.INFO
+masif_opts["log_format"] = "%(asctime)s - %(levelname)s - %(message)s"
+masif_opts["log_folder"] = "/masif_data/logs/"
+
+# Logging configuration with a rotating file handler, rotated every day.
+log_file = os.path.join(masif_opts["log_folder"], "masif.log")
+handler = TimedRotatingFileHandler(log_file, when="midnight", interval=1, backupCount=7)
+handler.setFormatter(logging.Formatter(masif_opts["log_format"]))
+logging.getLogger().addHandler(handler)
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logging.Formatter(masif_opts["log_format"]))
+logging.getLogger().addHandler(console_handler)
+logging.getLogger().setLevel(masif_opts["log_level"])
+
 # Default directories
 masif_opts["raw_pdb_dir"] = "/masif_data/data_preparation/00-raw_pdbs/"
 masif_opts["pdb_chain_dir"] = "/masif_data/data_preparation/01-benchmark_pdbs/"
@@ -56,12 +74,11 @@ masif_opts["site"]["n_conv_layers"] = 3
 masif_opts["site"]["max_distance"] = 9.0  # Radius for the neural network.
 masif_opts["site"]["masif_precomputation_dir"] = "/masif_data/precomputation/"
 masif_opts["site"]["range_val_samples"] = 0.9  # 0.9 to 1.0
-masif_opts["site"][
-    "model_dir"
-] = "/opt/conda/masif/data/masif_site/nn_models/all_feat_3l_v2/model_data/"
+masif_opts["site"]["model_dir"] = "/masif_data/nn_models/all_feat_3l_v2/model_data/"
 masif_opts["site"]["out_pred_dir"] = "output/all_feat_3l/pred_data/"
 masif_opts["site"]["out_surf_dir"] = "output/all_feat_3l/pred_surfaces/"
 masif_opts["site"]["feat_mask"] = [1.0] * 5
+masif_opts["site"]["tensorboard_log_dir"] = "/masif_data/training_logs/masif_site/"
 
 # Neural network ligand application specific parameters.
 masif_opts["ligand"] = {}

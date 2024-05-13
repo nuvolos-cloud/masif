@@ -1,21 +1,18 @@
-import tensorflow as tf
-import numpy as np
-from pathlib import Path
-import glob
-from scipy.spatial import cKDTree
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import roc_auc_score
-from tensorflow import keras
 import os
 import time
-import pickle
-import sys
+import glob
+import logging
+import tensorflow as tf
+import numpy as np
+from tensorflow import keras
 
 """
 train_evaluation_network.py: Train a neural network to score protein complex alignments (based on MaSIF)
 Freyr Sverrisson - LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
+
+logger = logging.getLogger(__name__)
 
 
 config = tf.compat.v1.ConfigProto()
@@ -56,11 +53,11 @@ n_samples = 0
 # Loading data into memory
 for i, d in enumerate(data_list):
     if (i % 100 == 0) and (i == 0):
-        print(i, "Feature array size (MB)", all_features.nbytes * 1e-6)
+        logger.info(i, "Feature array size (MB)", all_features.nbytes * 1e-6)
         start = time.time()
     elif i % 100 == 0:
         end = time.time()
-        print(
+        logger.info(
             i,
             "Feature array size (MB)",
             all_features.nbytes * 1e-6,
@@ -86,7 +83,8 @@ for i, d in enumerate(data_list):
         features = np.load(
             d + "/" + "features.npy", encoding="latin1", allow_pickle=True
         )
-    except:
+    except Exception as e:
+        logger.info("Could not open " + d + "/" + "features.npy: " + str(e))
         continue
     n_sources = len(features)
     features = features[chosen_alignments]
@@ -178,6 +176,3 @@ history = model.fit(
     class_weight={0: 1.0 / n_negatives, 1: 1.0 / n_positives},
     callbacks=callbacks,
 )
-
-# with open("histories/history_dict_3feat_new.pkl", "wb") as f:
-#    pickle.dump(history.history, f)

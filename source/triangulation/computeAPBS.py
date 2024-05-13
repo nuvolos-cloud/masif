@@ -1,10 +1,10 @@
 import os
 import numpy
+import logging
 from subprocess import Popen, PIPE
-import pymesh
+
 
 from default_config.global_vars import apbs_bin, pdb2pqr_bin, multivalue_bin
-import random
 
 """
 computeAPBS.py: Wrapper function to compute the Poisson Boltzmann electrostatics for a surface using APBS.
@@ -12,6 +12,8 @@ Pablo Gainza - LPDI STI EPFL 2019
 This file is part of MaSIF.
 Released under an Apache License 2.0
 """
+
+logger = logging.getLogger(__name__)
 
 
 def computeAPBS(vertices, pdb_file, tmp_file_base):
@@ -32,16 +34,16 @@ def computeAPBS(vertices, pdb_file, tmp_file_base):
         pdbname,
         filename_base + ".pqr",
     ]
-    print(f"### Running pdb2pqr_bin: {args}")
+    logger.debug("Running pdb2pqr_bin: {args}")
     p2 = Popen(args, stdout=PIPE, stderr=PIPE, cwd=directory)
     stdout, stderr = p2.communicate()
-    print(f"### Running pdb2pqr_bin done")
+    logger.debug("Running pdb2pqr_bin done")
 
     args = [apbs_bin, filename_base + ".in"]
-    print(f"### Running apbs: {args}")
+    logger.debug("Running apbs: {args}")
     p2 = Popen(args, stdout=PIPE, stderr=PIPE, cwd=directory)
     stdout, stderr = p2.communicate()
-    print(f"### Running apbs done")
+    logger.debug("Running apbs done")
 
     vertfile = open(directory + "/" + filename_base + ".csv", "w")
     for vert in vertices:
@@ -54,19 +56,19 @@ def computeAPBS(vertices, pdb_file, tmp_file_base):
         filename_base + ".pqr.dx",
         filename_base + "_out.csv",
     ]
-    print(f"### Running multivalue: {args}")
+    logger.debug("Running multivalue: {args}")
     p2 = Popen(args, stdout=PIPE, stderr=PIPE, cwd=directory)
     stdout, stderr = p2.communicate()
-    print(f"### Running multivalue done")
+    logger.debug("Running multivalue done")
 
     # Read the charge file
-    print(f"### Reading the charge file: {args}")
+    logger.debug("Reading the charge file: {args}")
     chargefile = open(tmp_file_base + "_out.csv")
     charges = numpy.array([0.0] * len(vertices))
     for ix, line in enumerate(chargefile.readlines()):
         charges[ix] = float(line.split(",")[3])
     chargefile.close()
-    print(f"### Chargefile closed.")
+    logger.debug("Chargefile closed.")
 
     remove_fn = os.path.join(directory, filename_base)
     # os.remove(remove_fn, )

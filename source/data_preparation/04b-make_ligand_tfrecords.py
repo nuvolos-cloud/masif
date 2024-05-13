@@ -1,10 +1,13 @@
+import os
+import glob
+import logging
 import numpy as np
 import tensorflow as tf
 from random import shuffle
-import os
-import glob
 from scipy import spatial
 from default_config.masif_opts import masif_opts
+
+logger = logging.getLogger(__name__)
 
 params = masif_opts["ligand"]
 ligands = ["ADP", "COA", "FAD", "HEM", "NAD", "NAP", "SAM"]
@@ -26,9 +29,9 @@ shuffle(all_pdbs)
 train = int(len(all_pdbs) * params["train_fract"])
 val = int(len(all_pdbs) * params["val_fract"])
 test = int(len(all_pdbs) * params["test_fract"])
-print("Train", train)
-print("Validation", val)
-print("Test", test)
+logger.info("Train", train)
+logger.info("Validation", val)
+logger.info("Test", test)
 train_pdbs = all_pdbs[:train]
 val_pdbs = all_pdbs[train : train + val]
 test_pdbs = all_pdbs[train + val : train + val + test]
@@ -50,7 +53,7 @@ with tf.io.TFRecordWriter(
     os.path.join(tfrecords_dir, "training_data_sequenceSplit_30.tfrecord")
 ) as writer:
     for i, pdb in enumerate(train_pdbs):
-        print("Working on", pdb)
+        logger.info("Working on", pdb)
         try:
             # Load precomputed data
             input_feat = np.load(
@@ -78,7 +81,8 @@ with tf.io.TFRecordWriter(
                     ligand_coord_dir, "{}_ligand_types.npy".format(pdb.split("_")[0])
                 )
             ).astype(str)
-        except:
+        except Exception as e:
+            logger.exception("Problem with loading precomputed data: ", e)
             continue
 
         if len(all_ligand_types) == 0:
@@ -127,11 +131,11 @@ with tf.io.TFRecordWriter(
         example = tf.train.Example(features=features)
         writer.write(example.SerializeToString())
         if i % 1 == 0:
-            print("Training data")
+            logger.info("Training data")
             success += 1
-            print(success)
-            print(pdb)
-            print(float(i) / len(train_pdbs))
+            logger.info(success)
+            logger.info(pdb)
+            logger.info(float(i) / len(train_pdbs))
 
 
 success = 0
@@ -165,7 +169,8 @@ with tf.io.TFRecordWriter(
                     ligand_coord_dir, "{}_ligand_types.npy".format(pdb.split("_")[0])
                 )
             ).astype(str)
-        except:
+        except Exception as e:
+            logger.exception("Problem with loading precomputed data: ", e)
             continue
 
         if len(all_ligand_types) == 0:
@@ -214,11 +219,11 @@ with tf.io.TFRecordWriter(
         example = tf.train.Example(features=features)
         writer.write(example.SerializeToString())
         if i % 1 == 0:
-            print("Validation data")
+            logger.info("Validation data")
             success += 1
-            print(success)
-            print(pdb)
-            print(float(i) / len(val_pdbs))
+            logger.info(success)
+            logger.info(pdb)
+            logger.info(float(i) / len(val_pdbs))
 
 
 success = 0
@@ -252,7 +257,8 @@ with tf.io.TFRecordWriter(
                     ligand_coord_dir, "{}_ligand_types.npy".format(pdb.split("_")[0])
                 )
             ).astype(str)
-        except:
+        except Exception as e:
+            logger.exception("Problem with loading precomputed data: ", e)
             continue
 
         if len(all_ligand_types) == 0:
@@ -301,8 +307,8 @@ with tf.io.TFRecordWriter(
         example = tf.train.Example(features=features)
         writer.write(example.SerializeToString())
         if i % 1 == 0:
-            print("Testing data")
+            logger.info("Testing data")
             success += 1
-            print(success)
-            print(pdb)
-            print(float(i) / len(test_pdbs))
+            logger.info(success)
+            logger.info(pdb)
+            logger.info(float(i) / len(test_pdbs))

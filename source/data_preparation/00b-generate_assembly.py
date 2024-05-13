@@ -1,7 +1,10 @@
 import os
 import sys
+import logging
 from SBI.structure import PDB
 from default_config.masif_opts import masif_opts
+
+logger = logging.getLogger(__name__)
 
 ligands = ["ADP", "COA", "FAD", "HEM", "NAD", "NAP", "SAM"]
 
@@ -29,6 +32,6 @@ pdb_id = in_fields[0]
 
 res = assemble(pdb_id)
 if res:
-    print("Building assembly was successfull for {}".format(pdb_id))
+    logger.info("Building assembly was successfull for {}".format(pdb_id))
 else:
-    print("Building assembly was not successfull for {}".format(pdb_id))
+    logger.info("Building assembly was not successfull for {}".format(pdb_id))

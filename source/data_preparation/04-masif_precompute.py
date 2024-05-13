@@ -1,8 +1,9 @@
 import sys
 import time
 import os
-import numpy as np
 import warnings
+import logging
+import numpy as np
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=FutureWarning)
@@ -10,19 +11,24 @@ with warnings.catch_warnings():
 # Configuration imports. Config should be in run_args.py
 from default_config.masif_opts import masif_opts
 
-np.random.seed(0)
-
 # Load training data (From many files)
 from masif_modules.read_data_from_surface import (
     read_data_from_surface,
     compute_shape_complementarity,
 )
 
-print(sys.argv[2])
+logger = logging.getLogger(__name__)
+
+
+np.random.seed(0)
+
+logger.info(f"Running MaSIF precomupute for: {sys.argv[2]}")
 
 if len(sys.argv) <= 1:
-    print("Usage: {config} " + sys.argv[0] + " {masif_ppi_search | masif_site} PDBID_A")
-    print("A or AB are the chains to include in this surface.")
+    logger.info(
+        "Usage: {config} " + sys.argv[0] + " {masif_ppi_search | masif_site} PDBID_A"
+    )
+    logger.info("A or AB are the chains to include in this surface.")
     sys.exit(1)
 
 masif_app = sys.argv[1]
@@ -40,7 +46,7 @@ ppi_pair_list = [sys.argv[2]]
 total_shapes = 0
 total_ppi_pairs = 0
 np.random.seed(0)
-print("Reading data from input ply surface files.")
+logger.info("Reading data from input ply surface files.")
 for ppi_pair_id in ppi_pair_list:
 
     all_list_desc = []
@@ -100,7 +106,7 @@ for ppi_pair_id in ppi_pair_list:
         np.save(my_precomp_dir + "p1_sc_labels", p1_sc_labels)
         np.save(my_precomp_dir + "p2_sc_labels", p2_sc_labels)
         end_time = time.time()
-        print(
+        logger.info(
             "Computing shape complementarity took {:.2f}".format(end_time - start_time)
         )
 
@@ -127,3 +133,4 @@ for ppi_pair_id in ppi_pair_list:
         np.save(my_precomp_dir + pid + "_X.npy", verts[pid][:, 0])
         np.save(my_precomp_dir + pid + "_Y.npy", verts[pid][:, 1])
         np.save(my_precomp_dir + pid + "_Z.npy", verts[pid][:, 2])
+        logger.info(f"Saved precomputed data for {pid} to {my_precomp_dir}")

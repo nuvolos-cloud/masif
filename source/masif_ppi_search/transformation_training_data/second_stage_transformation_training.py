@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 
 # from transformation_training_data.second_stage_transformation_training_helper import *
-from second_stage_transformation_training_helper import *
+
 
 # coding: utf-8
 import sys
-from open3d import *
-
-import numpy as np
 import os
-from Bio.PDB import *
-from default_config.masif_opts import masif_opts
+import logging
 from scipy.spatial import cKDTree
+from open3d import *
+import numpy as np
+from Bio.PDB import *
+
+from default_config.masif_opts import masif_opts
+from second_stage_transformation_training_helper import *
 
 """
 second_stage_transformation_training.py: Generate real and 'decoy' alignments to train a neural network to discriminate real docking poses vs. false ones.
@@ -19,15 +21,17 @@ second_stage_transformation_training.py: Generate real and 'decoy' alignments to
     Released under an Apache License 2.0
 """
 
-print(sys.argv)
+logger = logging.getLogger(__name__)
+
+logger.info(f"Running second strage transformation training on: {sys.argv}")
 if len(sys.argv) != 7:
-    print(
+    logger.info(
         "Usage: {} data_dir K ransac_iter patch_radius output_dir pdb_list_index".format(
             sys.argv[0]
         )
     )
-    print("data_dir: Location of data directory.")
-    print("K: Number of descriptors to run")
+    logger.info("data_dir: Location of data directory.")
+    logger.info("K: Number of descriptors to run")
     sys.exit(1)
 
 data_dir = sys.argv[1]
@@ -66,7 +70,6 @@ p2_point_clouds = []
 p2_patch_coords = []
 p2_names = []
 
-import scipy.spatial
 
 # Read all of p1, the target. p1 will have flipped descriptors.
 all_positive_scores = []
@@ -78,18 +81,19 @@ for target_ix, target_pdb in enumerate(rand_list):
     outdir = out_base + "/" + target_pdb + "/"
     if os.path.exists(outdir):
         continue
-    print(target_pdb)
+    logger.info(target_pdb)
     target_pdb_id = target_pdb.split("_")[0]
     chains = target_pdb.split("_")[1:]
 
     # Load target descriptors for global matching.
     try:
         target_desc = np.load(os.path.join(desc_dir, target_pdb, "p1_desc_flipped.npy"))
-    except:
-        print(
+    except Exception as e:
+        logger.exception(
             "Error opening {}".format(
                 os.path.join(desc_dir, target_pdb, "p1_desc_flipped.npy")
-            )
+            ),
+            e,
         )
         continue
 
@@ -193,7 +197,7 @@ for target_ix, target_pdb in enumerate(rand_list):
         if len(source_vix) == 0:
             continue
 
-        print("Source pdb: {}".format(source_pdb))
+        logger.info("Source pdb: {}".format(source_pdb))
 
         # Continue with this pdb.
         pdb_id = source_pdb.split("_")[0]
@@ -232,7 +236,7 @@ for target_ix, target_pdb in enumerate(rand_list):
 
         # If this is the ground truth, source_pdb, check if the alignment is correct.
         if source_pdb == target_pdb:
-            print(source_pdb)
+            logger.info(source_pdb)
             for j, res in enumerate(all_results):
                 rmsd = test_alignments(
                     res.transformation,
@@ -258,9 +262,9 @@ for target_ix, target_pdb in enumerate(rand_list):
     if found:
         count_found += 1
         all_rankings_desc.append(myrank_desc)
-        print(myrank_desc)
+        logger.info(myrank_desc)
     else:
-        print("N/D")
+        logger.info("N/D")
 
     # Make out directory
     if not os.path.exists(outdir):

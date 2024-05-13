@@ -1,12 +1,17 @@
 """ Data preparation script for masif_site dataset. """
 
 import os
-import subprocess
-from concurrent.futures import ThreadPoolExecutor
 import sys
+import subprocess
+import logging
+from concurrent.futures import ThreadPoolExecutor
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from default_config.masif_opts import masif_opts
+
+
+logger = logging.getLogger(__name__)
 
 
 def run_script(protein_name):
@@ -44,7 +49,7 @@ def main():
             if protein not in prepared_proteins:
                 protein_names.append(protein)
             else:
-                print(f"Skipping protein {protein} as it is already prepared.")
+                logger.info(f"Skipping protein {protein} as it is already prepared.")
 
     # Number of threads to use
     num_threads = 16
@@ -61,7 +66,7 @@ def main():
             try:
                 future.result()  # This will re-raise any exception caught during the execution
             except subprocess.CalledProcessError as e:
-                print(f"Error executing script for a protein: {e}")
+                logger.info(f"Error executing script for a protein: {e}")
 
 
 if __name__ == "__main__":

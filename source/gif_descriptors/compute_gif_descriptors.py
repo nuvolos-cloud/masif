@@ -1,7 +1,10 @@
 import os
+import sys
+import logging
 import numpy as np
 from default_config.masif_opts import masif_opts
-import sys
+
+logger = logging.getLogger(__name__)
 
 # This code computes Geometric Invariant Fingerprint descriptors for full proteins as originally proposed in:
 # S. Yin, et al. PNAS September 29, 2009 106 (39) 16622-16626
@@ -54,8 +57,8 @@ for ppi_pair_id in list_file:
             feat = np.load(mydir + "/" + pid + "_input_feat.npy")[:, :, 1]
             mask = np.load(mydir + "/" + pid + "_mask.npy")
             rho = np.load(mydir + "/" + pid + "_rho_wrt_center.npy")
-        except:
-            print("Error opening {}".format(ppi_pair_id))
+        except Exception as e:
+            logger.exception("Error opening {}".format(ppi_pair_id), e)
             continue
         myoutdir = os.path.join(out_dir, ppi_pair_id)
         if not os.path.exists(myoutdir):
@@ -71,3 +74,8 @@ for ppi_pair_id in list_file:
             all_desc_flipped.append(desc_flipped)
         np.save(myoutdir + "/" + pid + "_desc_straight", all_desc_straight)
         np.save(myoutdir + "/" + pid + "_desc_flipped", all_desc_flipped)
+        logger.info(
+            "Computed GIF descriptors for {} and saved to {}".format(
+                ppi_pair_id, myoutdir
+            )
+        )

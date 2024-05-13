@@ -5,14 +5,17 @@ This file is part of MaSIF.
 Released under an Apache License 2.0
 """
 
+import time
+import logging
 from sklearn.manifold import MDS
 import networkx as nx
 import numpy as np
 import scipy.linalg
 from numpy.linalg import norm
-import time
 from scipy.sparse import csr_matrix, coo_matrix
 import pymesh
+
+logger = logging.getLogger(__name__)
 
 
 def pad_or_truncate(some_list, target_len):
@@ -68,7 +71,7 @@ def compute_polar_coordinates(mesh, do_fast=True, radius=12, max_vertices=200):
     for key_tuple in dists:
         d2[key_tuple[0]] = key_tuple[1]
     end = time.perf_counter()
-    print("Dijkstra took {:.2f}s".format((end - start)))
+    logger.info("Dijkstra took {:.2f}s".format((end - start)))
     D = dict_to_sparse(d2)
 
     # Compute the faces per vertex.
@@ -101,7 +104,7 @@ def compute_polar_coordinates(mesh, do_fast=True, radius=12, max_vertices=200):
     #    output_patch_coords(subv, subf, subn, i, neigh_i, theta[i], D[i, :])
 
     mds_end_t = time.perf_counter()
-    print("MDS took {:.2f}s".format((mds_end_t - mds_start_t)))
+    logger.info("MDS took {:.2f}s".format((mds_end_t - mds_start_t)))
 
     n = len(d2)
     theta_out = np.zeros((n, max_vertices))
@@ -266,7 +269,6 @@ def extract_patch(mesh, neigh, cv):
         if f[i][0] in neigh and f[i][1] in neigh and f[i][2] in neigh
     ]
 
-    subfaces = subf
     return np.array(subverts), np.array(subn), np.array(subf)
 
 
@@ -319,7 +321,7 @@ def compute_theta_all(D, vertices, faces, normals, idx, radius):
     all_theta = []
     for i in range(D.shape[0]):
         if i % 100 == 0:
-            print(i)
+            logger.info(i)
         # Get the pairs of geodesic distances.
         neigh = D[i].nonzero()
         ii = np.where(D[i][neigh] < radius)[1]
@@ -387,6 +389,6 @@ def compute_theta_all_fast(D, vertices, faces, normals, idx, radius):
 
         all_theta.append(theta)
     end_loop = time.perf_counter()
-    print("Only MDS time: {:.2f}s".format(only_mds))
-    print("Full loop time: {:.2f}s".format(end_loop - start_loop))
+    logger.info("Only MDS time: {:.2f}s".format(only_mds))
+    logger.info("Full loop time: {:.2f}s".format(end_loop - start_loop))
     return all_theta

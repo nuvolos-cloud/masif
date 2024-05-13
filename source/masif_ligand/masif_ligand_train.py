@@ -1,11 +1,14 @@
 # Header variables and parameters.
 import os
+import logging
 import numpy as np
+from sklearn.metrics import confusion_matrix
+import tensorflow as tf
 from default_config.masif_opts import masif_opts
 from masif_modules.MaSIF_ligand import MaSIF_ligand
 from masif_modules.read_ligand_tfrecords import _parse_function
-from sklearn.metrics import confusion_matrix
-import tensorflow as tf
+
+logger = logging.getLogger(__name__)
 
 """
 masif_ligand_train.py: Train MaSIF-ligand. 
@@ -62,13 +65,14 @@ with tf.compat.v1.Session() as sess:
         training_losses = []
         training_ytrue = []
         training_ypred = []
-        print("Total iterations", total_iterations)
-        print("Calulating training loss")
+        logger.info("Total iterations", total_iterations)
+        logger.info("Calulating training loss")
         # Compute accuracy on a subset of the training set
         for num_train_sample in range(int(num_training_samples / 10)):
             try:
                 data_element = sess.run(training_next_element)
-            except:
+            except Exception as e:
+                logger.exception("Error running training session", e)
                 continue
             labels = data_element[4]
             n_ligands = labels.shape[1]
@@ -103,7 +107,7 @@ with tf.compat.v1.Session() as sess:
             training_ytrue.append(label)
             training_ypred.append(np.argmax(training_logits))
 
-        print(
+        logger.info(
             "Epoch {}, mean training loss {}, median training loss {}".format(
                 num_epoch, np.mean(training_losses), np.median(training_losses)
             )
@@ -114,18 +118,19 @@ with tf.compat.v1.Session() as sess:
         training_accuracy = float(np.sum(np.diag(training_conf_mat))) / np.sum(
             training_conf_mat
         )
-        print(training_conf_mat)
-        print("Training accuracy:", training_accuracy)
+        logger.info(training_conf_mat)
+        logger.info("Training accuracy:", training_accuracy)
 
         validation_losses = []
         validation_ytrue = []
         validation_ypred = []
-        print("Calulating validation loss")
+        logger.info("Calulating validation loss")
         # Compute accuracy on the validation set
         for num_val_sample in range(num_validation_samples):
             try:
                 data_element = sess.run(validation_next_element)
-            except:
+            except Exception as e:
+                logger.exception("Error running validation session", e)
                 continue
             labels = data_element[4]
             n_ligands = labels.shape[1]
@@ -158,7 +163,7 @@ with tf.compat.v1.Session() as sess:
             validation_ytrue.append(label)
             validation_ypred.append(np.argmax(validation_logits))
 
-        print(
+        logger.info(
             "Epoch {}, mean validation loss {}, median validation loss {}".format(
                 num_epoch, np.mean(validation_losses), np.median(validation_losses)
             )
@@ -167,21 +172,22 @@ with tf.compat.v1.Session() as sess:
         validation_accuracy = float(np.sum(np.diag(validation_conf_mat))) / np.sum(
             validation_conf_mat
         )
-        print(validation_conf_mat)
-        print("Validation accuracy:", validation_accuracy)
+        logger.info(validation_conf_mat)
+        logger.info("Validation accuracy:", validation_accuracy)
         if validation_accuracy > best_validation_accuracy:
-            print("Saving model")
+            logger.info("Saving model")
             learning_obj.saver.save(learning_obj.session, output_model)
             best_validation_accuracy = validation_accuracy
 
         testing_losses = []
         testing_ytrue = []
         testing_ypred = []
-        print("Calulating testing loss")
+        logger.info("Calulating testing loss")
         for num_test_sample in range(num_testing_samples):
             try:
                 data_element = sess.run(testing_next_element)
-            except:
+            except Exception as e:
+                logger.exception("Error running testing session", e)
                 continue
             labels = data_element[4]
             n_ligands = labels.shape[1]
@@ -214,7 +220,7 @@ with tf.compat.v1.Session() as sess:
             testing_ytrue.append(label)
             testing_ypred.append(np.argmax(testing_logits))
 
-        print(
+        logger.info(
             "Epoch {}, mean testing loss {}, median testing loss {}".format(
                 num_epoch, np.mean(testing_losses), np.median(testing_losses)
             )
@@ -223,8 +229,8 @@ with tf.compat.v1.Session() as sess:
         testing_accuracy = float(np.sum(np.diag(testing_conf_mat))) / np.sum(
             testing_conf_mat
         )
-        print(testing_conf_mat)
-        print("Testing accuracy:", testing_accuracy)
+        logger.info(testing_conf_mat)
+        logger.info("Testing accuracy:", testing_accuracy)
         # Stop training if number of iterations has reached 40000
         if total_iterations == 40000:
             break
@@ -286,7 +292,7 @@ with tf.compat.v1.Session() as sess:
             training_losses.append(training_loss)
             # training_ytrue.append(label)
             # training_ypred.append(np.argmax(logits_softmax))
-            print(
+            logger.info(
                 "Num sample {}\tTraining loss {}\nLabels {}\tSoftmax logits {}\tComputed loss {}\n".format(
                     num_sample,
                     training_loss,
@@ -296,7 +302,7 @@ with tf.compat.v1.Session() as sess:
                 )
             )
             if num_sample % 50 == 0:
-                print(
+                logger.info(
                     "Mean training loss {}, median training loss {}".format(
                         np.mean(training_losses), np.median(training_losses)
                     )

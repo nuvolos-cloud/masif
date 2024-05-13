@@ -2,6 +2,8 @@
 import numpy as np
 import os
 import shutil
+import logging
+
 from Bio.PDB import *
 import sys
 
@@ -12,7 +14,6 @@ from triangulation.fixmesh import fix_mesh
 import pymesh
 from input_output.extractPDB import extractPDB
 from input_output.save_ply import save_ply
-from input_output.read_ply import read_ply
 from input_output.protonate import protonate
 from triangulation.computeHydrophobicity import computeHydrophobicity
 from triangulation.computeCharges import computeCharges, assignChargesToNewMesh
@@ -20,9 +21,11 @@ from triangulation.computeAPBS import computeAPBS
 from triangulation.compute_normal import compute_normal
 from sklearn.neighbors import KDTree
 
+logger = logging.getLogger(__name__)
+
 if len(sys.argv) <= 1:
-    print("Usage: {config} " + sys.argv[0] + " PDBID_A")
-    print("A or AB are the chains to include in this surface.")
+    logger.error("Usage: {config} " + sys.argv[0] + " PDBID_A")
+    logger.error("A or AB are the chains to include in this surface.")
     sys.exit(1)
 
 
@@ -40,80 +43,80 @@ protonated_file = tmp_dir + "/" + pdb_id + ".pdb"
 protonate(pdb_filename, protonated_file)
 pdb_filename = protonated_file
 
-print(f"### Protonated file: {pdb_filename}")
+logger.info(f"Protonated file: {pdb_filename}")
 
 # Extract chains of interest.
 out_filename1 = tmp_dir + "/" + pdb_id + "_" + chain_ids1
 extractPDB(pdb_filename, out_filename1 + ".pdb", chain_ids1)
 
-print(f"### Extracted PDB file: {out_filename1+'.pdb'}")
+logger.info(f"Extracted PDB file: {out_filename1+'.pdb'}")
 
 # Compute MSMS of surface w/hydrogens,
 vertices1, faces1, normals1, names1, areas1 = computeMSMS(
     out_filename1 + ".pdb", protonate=True
 )
-print("### MSMS computed")
+logger.info("MSMS computed")
 
 # Compute "charged" vertices
 if masif_opts["use_hbond"]:
-    print("### Computing charges")
+    logger.info("Computing charges")
     vertex_hbond = computeCharges(out_filename1, vertices1, names1)
-    print("### Charges computed")
+    logger.info("Charges computed")
 
 # For each surface residue, assign the hydrophobicity of its amino acid.
 if masif_opts["use_hphob"]:
-    print("### Computing hydrophobicity")
+    logger.info("Computing hydrophobicity")
     vertex_hphobicity = computeHydrophobicity(names1)
-    print("### Computing hydrophobicity done")
+    logger.info("Computing hydrophobicity done")
 
 # If protonate = false, recompute MSMS of surface, but without hydrogens (set radius of hydrogens to 0).
 vertices2 = vertices1
 faces2 = faces1
 
 # Fix the mesh.
-print("### Fixing mesh")
+logger.info("Fixing mesh")
 mesh = pymesh.form_mesh(vertices2, faces2)
 regular_mesh = fix_mesh(mesh, masif_opts["mesh_res"])
-print("### Fixing mesh done")
+logger.info("Fixing mesh done")
 
 # Compute the normals
-print("### Computing normals")
+logger.info("Computing normals")
 vertex_normal = compute_normal(regular_mesh.vertices, regular_mesh.faces)
 # Assign charges on new vertices based on charges of old vertices (nearest
 # neighbor)
-print("### Computing normals done")
+logger.info("Computing normals done")
 
 if masif_opts["use_hbond"]:
-    print("### Assigning charges")
+    logger.info("Assigning charges")
     vertex_hbond = assignChargesToNewMesh(
         regular_mesh.vertices, vertices1, vertex_hbond, masif_opts
     )
-    print("### Assigning charges done")
+    logger.info("Assigning charges done")
 
 if masif_opts["use_hphob"]:
-    print("### Assigning charges hidro")
+    logger.info("Assigning charges hidro")
     vertex_hphobicity = assignChargesToNewMesh(
         regular_mesh.vertices, vertices1, vertex_hphobicity, masif_opts
     )
-    print("### Assigning charges hidro done")
+    logger.info("Assigning charges hidro done")
 
 if masif_opts["use_apbs"]:
-    print(f"### Computing APBS for {out_filename1+'.pdb'}")
+    logger.info(f"Computing APBS for {out_filename1+'.pdb'}")
     vertex_charges = computeAPBS(
         regular_mesh.vertices, out_filename1 + ".pdb", out_filename1
     )
-    print("### Computing APBS done")
+    logger.info("Computing APBS done")
 
 iface = np.zeros(len(regular_mesh.vertices))
 if "compute_iface" in masif_opts and masif_opts["compute_iface"]:
     # Compute the surface of the entire complex and from that compute the interface.
-    print("### Computing MSMS2")
+    logger.info("Computing MSMS2")
     v3, f3, _, _, _ = computeMSMS(pdb_filename, protonate=True)
-    print("### Computing MSMS2 done")
+    logger.info("Computing MSMS2 done")
     # Regularize the mesh
-    print("### Regularizing mesh")
+    logger.info("Regularizing mesh")
     mesh = pymesh.form_mesh(v3, f3)
-    print("### Regularizing mesh done")
+    logger.info("Regularizing mesh done")
     # I believe It is not necessary to regularize the full mesh. This can speed up things by a lot.
     full_regular_mesh = mesh
     # Find the vertices that are in the iface.
@@ -125,7 +128,7 @@ if "compute_iface" in masif_opts and masif_opts["compute_iface"]:
     assert len(d) == len(regular_mesh.vertices)
     iface_v = np.where(d >= 2.0)[0]
     iface[iface_v] = 1.0
-    print("### Saving ply1")
+    logger.info("Saving ply1")
     # Convert to ply and save.
     save_ply(
         out_filename1 + ".ply",
@@ -138,10 +141,10 @@ if "compute_iface" in masif_opts and masif_opts["compute_iface"]:
         hphob=vertex_hphobicity,
         iface=iface,
     )
-    print("### Saving ply1 done")
+    logger.info("Saving ply1 done")
 
 else:
-    print("### Saving ply2")
+    logger.info("Saving ply2")
     # Convert to ply and save.
     save_ply(
         out_filename1 + ".ply",
@@ -153,7 +156,7 @@ else:
         hbond=vertex_hbond,
         hphob=vertex_hphobicity,
     )
-    print("### Saving ply2 done")
+    logger.info("Saving ply2 done")
 if not os.path.exists(masif_opts["ply_chain_dir"]):
     os.makedirs(masif_opts["ply_chain_dir"])
 if not os.path.exists(masif_opts["pdb_chain_dir"]):

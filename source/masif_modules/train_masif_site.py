@@ -1,8 +1,12 @@
 import time
 import os
+import logging
 from sklearn import metrics
 import numpy as np
 import tensorflow as tf
+
+
+logger = logging.getLogger(__name__)
 
 
 # Apply mask to input_feat
@@ -60,9 +64,9 @@ def train_masif_site(
     best_val_auc = 0
 
     out_dir = params["model_dir"]
-    logfile = open(out_dir + "log.txt", "w")
+    logger.info("Training parameters:\n")
     for key in params:
-        logfile.write("{}: {}\n".format(key, params[key]))
+        logger.info("{}: {}\n".format(key, params[key]))
 
     training_list = open(params["training_list"]).readlines()
     training_list = [x.rstrip() for x in training_list]
@@ -85,8 +89,7 @@ def train_masif_site(
         list_val_neg_labels = []
         list_val_names = []
 
-        logfile.write("Starting epoch {}".format(num_iter))
-        print("Starting epoch {}".format(num_iter))
+        logger.info("Starting epoch {}".format(num_iter))
         tic = time.time()
         all_training_labels = []
         all_training_scores = []
@@ -105,7 +108,7 @@ def train_masif_site(
             mydir = params["masif_precomputation_dir"] + ppi_pair_id + "/"
             pdbid = ppi_pair_id.split("_")[0]
             chains1 = ppi_pair_id.split("_")[1]
-            print(f"### Processing {ppi_pair_id}")
+            logger.info(f"Processing {ppi_pair_id}")
             if len(ppi_pair_id.split("_")) > 2:
                 chains2 = ppi_pair_id.split("_")[2]
             else:
@@ -118,20 +121,20 @@ def train_masif_site(
             for pid in pids:
                 try:
                     iface_labels = np.load(mydir + pid + "_iface_labels.npy")
-                except:
-                    print(f"### Error loading {mydir + pid + '_iface_labels.npy'}")
+                except Exception as e:
+                    logger.info(f"Error loading {mydir + pid + '_iface_labels.npy'}", e)
                     continue
                 if len(iface_labels) > 8000:
-                    print(
-                        f"### Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels"
+                    logger.info(
+                        f"Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels"
                     )
                     continue
                 if (
                     np.sum(iface_labels) > 0.75 * len(iface_labels)
                     or np.sum(iface_labels) < 30
                 ):
-                    print(
-                        f"### Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds"
+                    logger.info(
+                        f"Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds"
                     )
                     continue
                 count_proteins += 1
@@ -153,7 +156,7 @@ def train_masif_site(
                     else:
                         tmp[i, 1] = 1
                 iface_labels_dc = tmp
-                logfile.flush()
+
                 pos_labels = np.where(iface_labels == 1)[0]
                 neg_labels = np.where(iface_labels == 0)[0]
                 np.random.shuffle(neg_labels)
@@ -189,7 +192,7 @@ def train_masif_site(
                 }
 
                 if ppi_pair_id in val_dirs:
-                    logfile.write("Validating on {} {}\n".format(ppi_pair_id, pid))
+                    logger.info("Validating on {} {}\n".format(ppi_pair_id, pid))
                     feed_dict[learning_obj.keep_prob] = 1.0
                     training_loss, score, eval_labels = learning_obj.session.run(
                         [
@@ -212,7 +215,7 @@ def train_masif_site(
                     all_val_labels = np.concatenate([all_val_labels, eval_labels[:, 0]])
                     all_val_scores = np.concatenate([all_val_scores, score])
                 else:
-                    logfile.write("Training on {} {}\n".format(ppi_pair_id, pid))
+                    logger.info("Training on {} {}\n".format(ppi_pair_id, pid))
                     feed_dict[learning_obj.keep_prob] = 1.0
                     (
                         _,
@@ -232,7 +235,9 @@ def train_masif_site(
                     )
                     # Log training loss and gradient norm to TensorBoard
                     with writer.as_default():
-                        tf.summary.scalar("training_loss", np.mean(training_loss), step=num_iter)
+                        tf.summary.scalar(
+                            "training_loss", np.mean(training_loss), step=num_iter
+                        )
                         tf.summary.scalar("norm_grad", norm_grad, step=num_iter)
 
                     all_training_labels = np.concatenate(
@@ -242,12 +247,11 @@ def train_masif_site(
                     auc = metrics.roc_auc_score(eval_labels[:, 0], score)
                     list_training_auc.append(auc)
                     list_training_loss.append(np.mean(training_loss))
-                logfile.flush()
 
         # Run testing cycle.
         for ppi_pair_id in data_dirs:
             mydir = params["masif_precomputation_dir"] + ppi_pair_id + "/"
-            print(f"### Running test cycle for {ppi_pair_id}")
+            logger.info(f"Running test cycle for {ppi_pair_id}")
             pdbid = ppi_pair_id.split("_")[0]
             chains1 = ppi_pair_id.split("_")[1]
             if len(ppi_pair_id.split("_")) > 2:
@@ -260,23 +264,23 @@ def train_masif_site(
             if pdbid + "_" + chains2 in testing_list:
                 pids.append("p2")
             for pid in pids:
-                logfile.write("Testing on {} {}\n".format(ppi_pair_id, pid))
+                logger.info("Testing on {} {}\n".format(ppi_pair_id, pid))
                 try:
                     iface_labels = np.load(mydir + pid + "_iface_labels.npy")
-                except:
-                    print(f"### Error loading {mydir + pid + '_iface_labels.npy'}")
+                except Exception as e:
+                    logger.info(f"Error loading {mydir + pid + '_iface_labels.npy'}", e)
                     continue
                 if len(iface_labels) > 20000:
-                    print(
-                        f"### Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels"
+                    logger.info(
+                        f"Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels"
                     )
                     continue
                 if (
                     np.sum(iface_labels) > 0.75 * len(iface_labels)
                     or np.sum(iface_labels) < 30
                 ):
-                    print(
-                        f"### Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds"
+                    logger.info(
+                        f"Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds"
                     )
                     continue
                 count_proteins += 1
@@ -298,7 +302,7 @@ def train_masif_site(
                     else:
                         tmp[i, 1] = 1
                 iface_labels_dc = tmp
-                logfile.flush()
+
                 pos_labels = np.where(iface_labels == 1)[0]
                 neg_labels = np.where(iface_labels == 0)[0]
 
@@ -347,12 +351,14 @@ def train_masif_site(
             outstr += "Testing auc (all points): N/A"
 
         outstr += "Epoch took {:2f}s\n".format(time.time() - tic)
-        logfile.write(outstr + "\n")
-        print(outstr)
+        logger.info(outstr)
 
         if np.mean(list_val_auc) > best_val_auc:
-            logfile.write(">>> Saving model.\n")
-            print(">>> Saving model.\n")
+            logger.info(
+                ">>> Saving model. AUC improved from {} to {}\n".format(
+                    best_val_auc, np.mean(list_val_auc)
+                )
+            )
             best_val_auc = np.mean(list_val_auc)
             output_model = out_dir + "model"
             learning_obj.saver.save(learning_obj.session, output_model)
@@ -361,6 +367,6 @@ def train_masif_site(
             np.save(out_dir + "test_scores.npy", all_test_scores)
             np.save(out_dir + "test_names.npy", list_test_names)
 
+    logger.info("Training finished, saving model to: {}".format(out_dir + "model"))
     tf.saved_model.save(learning_obj.session, out_dir + "saved_model")
-
-    logfile.close()
+    logger.info("Model saved.")

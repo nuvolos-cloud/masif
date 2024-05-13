@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
-import pymesh
 import time
 import os
-from default_config.masif_opts import masif_opts
+import logging
+import pymesh
 import numpy as np
 from Bio.PDB import *
-import sys
+from default_config.masif_opts import masif_opts
+
+logger = logging.getLogger(__name__)
 
 start_time = time.time()
 
@@ -15,16 +17,6 @@ pdl1_benchmark.py: Scan a large database of proteins for binders of PD-L1. The g
 Pablo Gainza and Freyr Sverrisson - LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
-
-
-def blockPrint():
-    sys.stdout = open(os.devnull, "w")
-    sys.stderr = open(os.devnull, "w")
-
-
-def enablePrint():
-    sys.stdout = sys.__stdout__
-    sys.stderr = sys.__stderr__
 
 
 masif_root = os.environ["masif_root"]
@@ -160,9 +152,12 @@ def match_descriptors(
                     pdb_chain_id = fields[0] + "_" + fields[2]
                 iface = np.load(in_iface_dir + "/pred_" + pdb_chain_id + ".npy")[0]
                 descs = np.load(mydescdir + "/" + pid + "_desc_straight.npy")
-            except:
+            except Exception as e:
+                logger.info(
+                    "Could not open " + mydescdir + "/" + pid + "_desc_straight.npy"
+                )
                 continue
-            print(pdb_chain_id)
+            logger.info(pdb_chain_id)
             name = (ppi_pair_id, pid)
             count_proteins += 1
 
@@ -176,10 +171,10 @@ def match_descriptors(
                 all_matched_names.append([name] * len(selected))
                 all_matched_vix.append(selected)
                 all_matched_desc_dist.append(diff[selected])
-                print("Matched {}".format(ppi_pair_id))
-                print("Scores: {} {}".format(iface[selected], diff[selected]))
+                logger.info("Matched {}".format(ppi_pair_id))
+                logger.info("Scores: {} {}".format(iface[selected], diff[selected]))
 
-    print("Iterated over {} proteins.".format(count_proteins))
+    logger.info("Iterated over {} proteins.".format(count_proteins))
     return all_matched_names, all_matched_vix, all_matched_desc_dist, count_proteins
 
 
@@ -292,9 +287,9 @@ def multidock(
         )
         all_source_scores.append(source_scores)
         score_time = score_time + (time.time() - tic)
-    # print('Ransac time = {:.2f}'.format(ransac_time))
-    # print('Extraction time = {:.2f}'.format(patch_time))
-    # print('Score time = {:.2f}'.format(score_time))
+    # logger.info('Ransac time = {:.2f}'.format(ransac_time))
+    # logger.info('Extraction time = {:.2f}'.format(patch_time))
+    # logger.info('Score time = {:.2f}'.format(score_time))
 
     return all_results, all_source_patch, all_source_scores
 
@@ -401,8 +396,7 @@ matched_vix = np.concatenate(matched_vix, axis=0)
 matched_desc_dist = np.concatenate(matched_desc_dist, axis=0)
 
 matched_dict = {}
-out_log = open("log.txt", "w+")
-out_log.write("Total number of proteins {}\n".format(count_proteins))
+logger.info("Total number of proteins {}\n".format(count_proteins))
 for name_ix, name in enumerate(matched_names):
     name = (name[0], name[1])
     if name not in matched_dict:
@@ -425,14 +419,10 @@ for name in matched_dict.keys():
     # Load source ply file, coords, and descriptors.
     tic = time.time()
 
-    print("{}".format(pdb + "_" + chain))
-    blockPrint()
+    logger.info("Reading point cloud for {}".format(pdb + "_" + chain))
     source_pcd = read_point_cloud(
         os.path.join(surf_dir, "{}.ply".format(pdb + "_" + chain))
     )
-    enablePrint()
-    #    print('Reading ply {}'.format(time.time()- tic))
-    enablePrint()
 
     tic = time.time()
     source_vix = matched_dict[name]
@@ -444,7 +434,7 @@ for name in matched_dict.keys():
         cv=source_vix,
     )
     #    except:
-    #        print("Coordinates not found. continuing.")
+    #        logger.info("Coordinates not found. continuing.")
     #        continue
     source_desc = np.load(
         os.path.join(desc_dir, ppi_pair_id, pid + "_desc_straight.npy")
@@ -472,8 +462,7 @@ for name in matched_dict.keys():
         # Load source structure
         # Perform the transformation on the atoms
         for j in top_scorers:
-            print("{} {} {}".format(ppi_pair_id, scores[j], pid))
-            out_log.write("{} {} {}\n".format(ppi_pair_id, scores[j], pid))
+            logger.info("{} {} {}".format(ppi_pair_id, scores[j], pid))
             source_struct = parser.get_structure(
                 "{}_{}".format(pdb, chain),
                 os.path.join(pdb_dir, "{}_{}.pdb".format(pdb, chain)),
@@ -496,4 +485,4 @@ for name in matched_dict.keys():
 
 
 end_time = time.time()
-out_log.write("Took {}s\n".format(end_time - start_time))
+logger.info("Took {}s\n".format(end_time - start_time))

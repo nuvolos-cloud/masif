@@ -1,18 +1,22 @@
 import os
 import sys
+import logging
+import random
 from subprocess import Popen, PIPE
 
 from input_output.read_msms import read_msms
 from triangulation.xyzrn import output_pdb_as_xyzrn
 from default_config.global_vars import msms_bin
 from default_config.masif_opts import masif_opts
-import random
+
+logger = logging.getLogger(__name__)
 
 
 # Pablo Gainza LPDI EPFL 2017-2019
 # Calls MSMS and returns the vertices.
 # Special atoms are atoms with a reduced radius.
 def computeMSMS(pdb_file, protonate=True):
+    logger.info("Computing MSMS for file: " + pdb_file)
     randnum = random.randint(1, 10000000)
     file_base = masif_opts["tmp_dir"] + "/msms_" + str(randnum)
     out_xyzrn = file_base + ".xyzrn"
@@ -20,7 +24,7 @@ def computeMSMS(pdb_file, protonate=True):
     if protonate:
         output_pdb_as_xyzrn(pdb_file, out_xyzrn)
     else:
-        print("Error - pdb2xyzrn is deprecated.")
+        logger.error("Error - pdb2xyzrn is deprecated.")
         sys.exit(1)
     # Now run MSMS on xyzrn file
     FNULL = open(os.devnull, "w")
@@ -56,4 +60,5 @@ def computeMSMS(pdb_file, protonate=True):
     os.remove(file_base + ".xyzrn")
     os.remove(file_base + ".vert")
     os.remove(file_base + ".face")
+    logger.info("MSMS done.")
     return vertices, faces, normals, names, areas

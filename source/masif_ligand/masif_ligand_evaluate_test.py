@@ -1,4 +1,5 @@
 import os
+import logging
 import numpy as np
 from default_config.masif_opts import masif_opts
 from masif_modules.MaSIF_ligand import MaSIF_ligand
@@ -10,6 +11,8 @@ masif_ligand_evaluate_test: Evaluate and test MaSIF-ligand.
 Freyr Sverrisson - LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
+
+logger = logging.getLogger(__name__)
 
 params = masif_opts["ligand"]
 # Load testing data
@@ -53,7 +56,7 @@ with tf.compat.v1.Session() as sess:
         except:
             continue
 
-        print(num_test_sample)
+        logger.info(num_test_sample)
 
         labels = data_element[4]
         n_ligands = labels.shape[1]

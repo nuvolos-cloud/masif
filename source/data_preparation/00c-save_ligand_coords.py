@@ -1,9 +1,11 @@
 import os
 import numpy as np
 import sys
-
+import logging
 from SBI.structure import PDB
 from default_config.masif_opts import masif_opts
+
+logger = logging.getLogger(__name__)
 
 in_fields = sys.argv[1].split("_")
 pdb_id = in_fields[0]
@@ -20,8 +22,9 @@ try:
     structure = PDB(
         os.path.join(masif_opts["ligand"]["assembly_dir"], "{}.pdb".format(pdb_id))
     )
-except:
-    print("Problem with opening structure", pdb)
+except Exception as e:
+    logger.exception("Problem with opening structure: ", e)
+
 for chain in structure.chains:
     for het in chain.heteroatoms:
         # Check all ligands in structure and save coordinates if they are of interest

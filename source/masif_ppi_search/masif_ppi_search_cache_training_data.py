@@ -1,10 +1,10 @@
 # Header variables and parameters.
 import sys
-import pymesh
-import os
-import numpy as np
 import importlib
-
+import os
+import logging
+import pymesh
+import numpy as np
 from scipy.spatial import cKDTree
 
 from default_config.masif_opts import masif_opts
@@ -17,6 +17,9 @@ Pablo Gainza - LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
 
+logger = logging.getLogger(__name__)
+
+
 params = masif_opts["ppi_search"]
 
 if len(sys.argv) > 0:
@@ -25,7 +28,7 @@ if len(sys.argv) > 0:
     custom_params = custom_params.custom_params
 
     for key in custom_params:
-        print("Setting {} to {} ".format(key, custom_params[key]))
+        logger.info("Setting {} to {} ".format(key, custom_params[key]))
         params[key] = custom_params[key]
 
 if "pids" not in params:
@@ -65,7 +68,7 @@ for count, ppi_pair_id in enumerate(os.listdir(parent_in_dir)):
     if ppi_pair_id not in testing_list and ppi_pair_id not in training_list:
         continue
     in_dir = parent_in_dir + ppi_pair_id + "/"
-    print(ppi_pair_id)
+    logger.info(f"Working with {ppi_pair_id}")
 
     # Read binder and pos.
     train_val = np.random.random()
@@ -77,7 +80,7 @@ for count, ppi_pair_id in enumerate(os.listdir(parent_in_dir)):
         labels = np.median(mylabels, axis=1)
 
     except Exception as e:
-        print("Could not open " + in_dir + "p1" + "_sc_labels.npy: " + str(e))
+        logger.info("Could not open " + in_dir + "p1" + "_sc_labels.npy: " + str(e))
         continue
 
     # Read the corresponding ply files.
@@ -187,8 +190,8 @@ neg_input_feat = np.concatenate(neg_input_feat, axis=0)
 neg_mask = np.concatenate(neg_mask, axis=0)
 np.save(params["cache_dir"] + "/neg_names.npy", neg_names)
 
-print("Read {} negative shapes".format(len(neg_rho_wrt_center)))
-print("Read {} positive shapes".format(len(pos_rho_wrt_center)))
+logger.info("Read {} negative shapes".format(len(neg_rho_wrt_center)))
+logger.info("Read {} positive shapes".format(len(pos_rho_wrt_center)))
 np.save(params["cache_dir"] + "/binder_rho_wrt_center.npy", binder_rho_wrt_center)
 np.save(params["cache_dir"] + "/binder_theta_wrt_center.npy", binder_theta_wrt_center)
 np.save(params["cache_dir"] + "/binder_input_feat.npy", binder_input_feat)
@@ -210,3 +213,4 @@ np.save(params["cache_dir"] + "/neg_theta_wrt_center.npy", neg_theta_wrt_center)
 np.save(params["cache_dir"] + "/neg_input_feat.npy", neg_input_feat)
 np.save(params["cache_dir"] + "/neg_mask.npy", neg_mask)
 np.save(params["cache_dir"] + "/neg_names.npy", neg_names)
+logger.info(f"Saved data to {params['cache_dir']}")

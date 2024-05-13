@@ -1,9 +1,11 @@
 #!/usr/bin/python
-import numpy as np
+import sys
 import os
 import shutil
+import logging
+import numpy as np
 from Bio.PDB import *
-import sys
+
 
 # Local includes
 from default_config.masif_opts import masif_opts
@@ -17,6 +19,9 @@ from triangulation.computeHydrophobicity import computeHydrophobicity
 from triangulation.computeCharges import computeCharges, assignChargesToNewMesh
 from triangulation.computeAPBS import computeAPBS
 from triangulation.compute_normal import compute_normal
+
+
+logger = logging.getLogger(__name__)
 
 
 # Compute all helices in the PDB chain.
@@ -50,8 +55,8 @@ def computeHelices(pdbid, pdbfilename, chain_id):
 
 
 if len(sys.argv) <= 1:
-    print("Usage: {config} " + sys.argv[0] + " PDBID_A")
-    print("A or AB are the chains to include in this surface.")
+    logger.error("Usage: {config} " + sys.argv[0] + " PDBID_A")
+    logger.error("A or AB are the chains to include in this surface.")
     sys.exit(1)
 
 
@@ -64,7 +69,7 @@ pdb_filename = masif_opts["raw_pdb_dir"] + pdb_id + ".pdb"
 tmp_dir = masif_opts["tmp_dir"]
 
 protonated_file = tmp_dir + "/" + pdb_id + ".pdb"
-print("Protonating file {}".format(protonated_file))
+logger.info("Protonating file {}".format(protonated_file))
 protonate(pdb_filename, protonated_file)
 pdb_filename = protonated_file
 
@@ -72,9 +77,11 @@ pdb_filename = protonated_file
 for chain_id in list(chain_ids1):
     helices = computeHelices(pdb_id, pdb_filename, chain_id)
     if len(helices) == 0:
-        print("No helices were found in PDB structure.")
+        logger.info("No helices were found in PDB structure.")
     else:
-        print("Extracting helixces for {} chain {}".format(pdb_filename, chain_id))
+        logger.info(
+            "Extracting helixces for {} chain {}".format(pdb_filename, chain_id)
+        )
     for ix, helix in enumerate(helices):
         out_filename1 = "{}/{}{:03d}_{}".format(tmp_dir, pdb_id, ix, chain_id)
         extractHelix(helix, pdb_filename, out_filename1 + ".pdb", chain_id)

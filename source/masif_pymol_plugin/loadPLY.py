@@ -1,8 +1,6 @@
-from pymol import cmd, stored
-import sys
-import os, math, re
+import logging
+from pymol import cmd
 from pymol.cgo import *
-import os.path
 import numpy as np
 
 """
@@ -11,6 +9,9 @@ import numpy as np
     This file is part of MaSIF.
     Released under an Apache License 2.0
 """
+
+logger = logging.getLogger(__name__)
+
 colorDict = {
     "sky": [COLOR, 0.0, 0.76, 1.0],
     "sea": [COLOR, 0.0, 0.90, 0.5],
@@ -35,7 +36,7 @@ def color_gradient(vals, color1, color2):
     ix = np.floor(vals * 100).astype(int)
     crange = list(c1.range_to(c2, 100))
     mycolor = []
-    print(crange[0].get_rgb())
+    logger.debug(crange[0].get_rgb())
     for x in ix:
         myc = crange[x].get_rgb()
         mycolor.append([COLOR, myc[0], myc[1], myc[2]])
@@ -84,7 +85,6 @@ def charge_color(charges):
     blue_charges = blue_charges / max_val
     # red_charges[red_charges>1.0] = 1.0
     # blue_charges[blue_charges>1.0] = 1.0
-    green_color = np.array([0.0] * len(charges))
     mycolor = [
         [
             COLOR,
@@ -116,7 +116,6 @@ def load_ply(
 
     ignore_normal = False
     with_normal = False
-    with_color = False
 
     group_names = ""
 
@@ -124,15 +123,17 @@ def load_ply(
     try:
         charge = mesh.get_attribute("vertex_charge")
         color_array = charge_color(charge)
-    except:
-        print("Could not load vertex charges.")
+    except Exception as e:
+        logger.exception(
+            "Could not load vertex charges for file {}.".format(filename), e
+        )
         color_array = [colorDict["green"]] * len(verts)
     if "vertex_nx" in mesh.get_attribute_names():
         nx = mesh.get_attribute("vertex_nx")
         ny = mesh.get_attribute("vertex_ny")
         nz = mesh.get_attribute("vertex_nz")
         normals = np.vstack([nx, ny, nz]).T
-        print(normals.shape)
+        logger.debug(normals.shape)
 
     # Draw vertices
     obj = []
@@ -410,7 +411,7 @@ def load_ply(
             obj.append(END)
         cmd.load_cgo(obj, "normal_" + filename, 1.0)
 
-    print(group_names)
+    logger.debug(group_names)
     cmd.group(filename, group_names)
 
 
@@ -427,7 +428,7 @@ def load_giface(filename, color="white", name="giface", dotSize=0.2, lineSize=1.
     faces = mesh.faces
     verts = mesh.vertices
     obj = []
-    visited = set()
+
     colorToAdd = colorDict["green"]
     obj.extend([BEGIN, LINES])
     obj.extend([LINEWIDTH, 5.0])

@@ -2,15 +2,18 @@
 from Bio.PDB import *
 import sys
 import os
+import logging
 
 from default_config.masif_opts import masif_opts
 
 # Local includes
 from input_output.protonate import protonate
 
+logger = logging.getLogger(__name__)
+
 if len(sys.argv) <= 1:
-    print("Usage: " + sys.argv[0] + " PDBID_A_B")
-    print("A or B are the chains to include in this pdb.")
+    logger.info("Usage: " + sys.argv[0] + " PDBID_A_B")
+    logger.info("A or B are the chains to include in this pdb.")
     sys.exit(1)
 
 if not os.path.exists(masif_opts["raw_pdb_dir"]):

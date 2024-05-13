@@ -1,10 +1,11 @@
-import pymesh
 import os
 import sys
-from sklearn.metrics import roc_auc_score
 import importlib
+import logging
 import numpy as np
 import tensorflow as tf
+from sklearn.metrics import roc_auc_score
+import pymesh
 from default_config.masif_opts import masif_opts
 
 """
@@ -13,6 +14,8 @@ Pablo Gainza - LPDI STI EPFL 2019
 This file is part of MaSIF.
 Released under an Apache License 2.0
 """
+
+logger = logging.getLogger(__name__)
 
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
 tf.compat.v1.disable_v2_behavior()
@@ -23,7 +26,7 @@ custom_params = importlib.import_module(custom_params_file, package=None)
 custom_params = custom_params.custom_params
 
 for key in custom_params:
-    print("Setting {} to {} ".format(key, custom_params[key]))
+    logger.info("Setting {} to {} ".format(key, custom_params[key]))
     params[key] = custom_params[key]
 
 # Shape precomputation dir.
@@ -44,10 +47,10 @@ elif len(sys.argv) == 4 and sys.argv[2] == "-l":
     for mydir in os.listdir(parent_in_dir):
         ppi_pair_ids.append(mydir)
 else:
-    print("Not enough parameters")
+    logger.warning("Not enough parameters")
     sys.exit(1)
 
-print(f"### Evaluating predictions: {ppi_pair_ids}")
+logger.info(f"Evaluating predictions: {ppi_pair_ids}")
 
 for ppi_pair_id in ppi_pair_ids:
     fields = ppi_pair_id.split("_")
@@ -71,20 +74,20 @@ for ppi_pair_id in ppi_pair_ids:
             and pdb_chain_id + "_" not in eval_list
             and len(eval_list) > 0
         ):
-            print(f"### {pdb_chain_id} is not in eval list")
+            logger.warning(f"{pdb_chain_id} is not in eval list")
             continue
 
         try:
             p1 = pymesh.load_mesh(ply_file)
-        except:
-            print("File does not exist: {}".format(ply_file))
+        except Exception as e:
+            logger.exception("File does not exist: {}".format(ply_file), e)
             continue
         try:
             scores = np.load(
                 params["out_pred_dir"] + "/pred_" + pdbid + "_" + chains[ix] + ".npy"
             )
-        except:
-            print(
+        except Exception as e:
+            logger.exception(
                 "File does not exist: {}".format(
                     params["out_pred_dir"]
                     + "/pred_"
@@ -92,7 +95,8 @@ for ppi_pair_id in ppi_pair_ids:
                     + "_"
                     + chains[ix]
                     + ".npy"
-                )
+                ),
+                e,
             )
             continue
 
@@ -103,14 +107,15 @@ for ppi_pair_id in ppi_pair_ids:
         try:
             roc_auc = roc_auc_score(ground_truth, scores[0])
             all_roc_auc_scores.append(roc_auc)
-            print(
+            logger.info(
                 "ROC AUC score for protein {} : {:.2f} ".format(
                     pdbid + "_" + chains[ix], roc_auc
                 )
             )
-        except:
-            print(
-                "No ROC AUC computed for protein (possibly, no ground truth defined in input)"
+        except Exception as e:
+            logger.exception(
+                "No ROC AUC computed for protein (possibly, no ground truth defined in input)",
+                e,
             )
 
         mymesh.remove_attribute("vertex_iface")
@@ -131,12 +136,12 @@ for ppi_pair_id in ppi_pair_ids:
             use_float=True,
             ascii=True,
         )
-        print(
+        logger.info(
             "Successfully saved file " + params["out_surf_dir"] + pdb_chain_id + ".ply"
         )
 
 med_roc = np.median(all_roc_auc_scores)
 
 if len(all_roc_auc_scores) > 0:
-    print("Computed the ROC AUC for {} proteins".format(len(all_roc_auc_scores)))
-    print("Median ROC AUC score: {}".format(med_roc))
+    logger.info("Computed the ROC AUC for {} proteins".format(len(all_roc_auc_scores)))
+    logger.info("Median ROC AUC score: {}".format(med_roc))

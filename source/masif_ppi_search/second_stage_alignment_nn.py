@@ -2,13 +2,14 @@
 # coding: utf-8
 import sys
 import time
+import os
+import copy
+import logging
 import sklearn.metrics
 from geometry.open3d_import import *
 import numpy as np
-import os
+
 from alignment_utils_masif_search import (
-    compute_nn_score,
-    rand_rotation_matrix,
     get_center_and_random_rotate,
     get_patch_geo,
     multidock,
@@ -18,10 +19,9 @@ from alignment_utils_masif_search import (
 from transformation_training_data.score_nn import ScoreNN
 from scipy.spatial import cKDTree
 from Bio.PDB import *
-import copy
-import scipy.sparse as spio
+
 from default_config.masif_opts import masif_opts
-import sys
+
 
 """
 second_stage_alignment_nn.py: Second stage alignment code for benchmarking MaSIF-search.
@@ -38,6 +38,8 @@ Pablo Gainza and Freyr Sverrisson - LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
 
+logger = logging.getLogger(__name__)
+
 
 # Start measuring the cpu clock time here.
 # We will not count the time required to align the structures and verify the ground truth.
@@ -47,14 +49,16 @@ global_ground_truth_time = 0.0
 
 # Read the pre-trained neural network.
 nn_model = ScoreNN()
-print(sys.argv)
+logger.info(f"Starting second stage alignment for {sys.argv}")
 
 if len(sys.argv) != 6 or (sys.argv[5] != "masif" and sys.argv[5] != "gif"):
-    print("Usage: {} data_dir K ransac_iter num_success gif|masif".format(sys.argv[0]))
-    print("data_dir: Location of data directory.")
-    print("K: Number of decoy descriptors per target")
-    print("ransac_iter: number of ransac iterations.")
-    print("num_success: true alignment within short list of size num_success")
+    logger.info(
+        "Usage: {} data_dir K ransac_iter num_success gif|masif".format(sys.argv[0])
+    )
+    logger.info("data_dir: Location of data directory.")
+    logger.info("K: Number of decoy descriptors per target")
+    logger.info("ransac_iter: number of ransac iterations.")
+    logger.info("num_success: true alignment within short list of size num_success")
     sys.exit(1)
 
 data_dir = sys.argv[1]
@@ -106,7 +110,7 @@ p2_names = []
 # First we read in all the decoy 'binder' shapes.
 # Read all of p2. p2 will have straight descriptors.
 for i, pdb in enumerate(rand_list):
-    print("Loading patch coordinates for {}".format(pdb))
+    logger.info("Loading patch coordinates for {}".format(pdb))
     pdb_id = pdb.split("_")[0]
     chains = pdb.split("_")[1:]
     # Descriptors for global matching.
@@ -143,7 +147,7 @@ all_rankings_desc = []
 # The target will have flipped (inverted) descriptors.
 for target_ix, target_pdb in enumerate(rand_list):
     cycle_start_time = time.clock()
-    print("Docking all binders on target: {} ".format(target_pdb))
+    logger.info("Docking all binders on target: {} ".format(target_pdb))
     target_pdb_id = target_pdb.split("_")[0]
     chains = target_pdb.split("_")[1:]
 
@@ -303,21 +307,21 @@ for target_ix, target_pdb in enumerate(rand_list):
     if found:
         count_found += 1
         all_rankings_desc.append(myrank_desc)
-        print("Descriptor rank: {}".format(myrank_desc))
-        print(
+        logger.info("Descriptor rank: {}".format(myrank_desc))
+        logger.info(
             "Mean positive score: {}, mean negative score: {}".format(
                 np.mean(pos_scores), np.mean(neg_scores)
             )
         )
         max_pos_score = np.max(pos_scores)
         rank = np.sum(neg_scores > max_pos_score) + 1
-        print("Neural network rank: {}".format(rank))
+        logger.info("Neural network rank: {}".format(rank))
         y_true = np.concatenate([np.zeros_like(pos_scores), np.ones_like(neg_scores)])
         y_pred = np.concatenate([pos_scores, neg_scores])
         auc = 1.0 - sklearn.metrics.roc_auc_score(y_true, y_pred)
-        print("ROC AUC (protein): {:.3f}".format(auc))
+        logger.info("ROC AUC (protein): {:.3f}".format(auc))
     else:
-        print("N/D")
+        logger.info("N/D")
     gt_end_time = time.clock()
     global_ground_truth_time += gt_end_time - gt_start_time
 
@@ -326,7 +330,7 @@ for target_ix, target_pdb in enumerate(rand_list):
     all_negative_scores.append(neg_scores)
     cycle_end_time = time.clock()
     cycle_time = cycle_end_time - cycle_start_time - (gt_end_time - gt_start_time)
-    print(
+    logger.info(
         "Cycle took {:.2f} cpu seconds (excluding ground truth time) ".format(
             cycle_time
         )
@@ -341,7 +345,7 @@ global_cpu_time = global_end_time - global_start_time - global_ground_truth_time
 # Convert to minutes.
 global_cpu_time = global_cpu_time / 60
 
-print("All alignments took {} min".format(global_cpu_time))
+logger.info("All alignments took {} min".format(global_cpu_time))
 
 
 all_pos = []
@@ -361,7 +365,7 @@ rmsds = []
 # Print and write the output information from MaSIF-search
 for pdb_ix in range(len(all_positive_scores)):
     if len(all_positive_scores[pdb_ix]) == 0:
-        print("N/D")
+        logger.info("N/D")
         unranked += 1
     else:
         pos_scores = all_positive_scores[pdb_ix]
@@ -372,11 +376,11 @@ for pdb_ix in range(len(all_positive_scores)):
 
         number_better_than_best_pos = np.sum(neg_scores > best_pos_score) + 1
         if number_better_than_best_pos > num_success:
-            print("{} N/D".format(rand_list[pdb_ix]))
+            logger.info("{} N/D".format(rand_list[pdb_ix]))
             unranked += 1
         else:
             rmsds.append(best_rmsd)
-            print(
+            logger.info(
                 "{} {} out of {} -- pos scores: {}".format(
                     rand_list[pdb_ix],
                     number_better_than_best_pos,
@@ -386,19 +390,19 @@ for pdb_ix in range(len(all_positive_scores)):
             )
             ranks.append(number_better_than_best_pos)
 ranks = np.array(ranks)
-print("Median rank for correctly ranked ones: {}".format(np.median(ranks)))
-print("Mean rank for correctly ranked ones: {}".format(np.mean(ranks)))
-print(
+logger.info("Median rank for correctly ranked ones: {}".format(np.median(ranks)))
+logger.info("Mean rank for correctly ranked ones: {}".format(np.mean(ranks)))
+logger.info(
     "Number in top 100 {} out of {}".format(
         np.sum(ranks <= 100), len(all_positive_scores)
     )
 )
-print(
+logger.info(
     "Number in top 10 {} out of {}".format(
         np.sum(ranks <= 10), len(all_positive_scores)
     )
 )
-print(
+logger.info(
     "Number in top 1 {} out of {}".format(np.sum(ranks <= 1), len(all_positive_scores))
 )
 

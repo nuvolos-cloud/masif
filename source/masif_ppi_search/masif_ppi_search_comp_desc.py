@@ -1,12 +1,15 @@
 # Header variables and parameters.
-import pymesh
 import sys
 import os
 import time
+import importlib
+import logging
+import pymesh
 import numpy as np
 from sklearn import metrics
-import importlib
 from default_config.masif_opts import masif_opts
+
+logger = logging.getLogger(__name__)
 
 
 # Apply mask to input_feat
@@ -28,7 +31,7 @@ custom_params = importlib.import_module(custom_params_file, package=None)
 custom_params = custom_params.custom_params
 
 for key in custom_params:
-    print("Setting {} to {} ".format(key, custom_params[key]))
+    logger.info("Setting {} to {} ".format(key, custom_params[key]))
     params[key] = custom_params[key]
 
 # Read the positive first
@@ -38,7 +41,7 @@ np.random.seed(0)
 
 
 #   Load existing network.
-print("Reading pre-trained network")
+logger.info("Reading pre-trained network")
 from masif_modules.MaSIF_ppi_search import MaSIF_ppi_search
 
 learning_obj = MaSIF_ppi_search(
@@ -75,21 +78,20 @@ elif len(sys.argv) == 4 and sys.argv[2] == "-l":
 else:
     sys.exit(1)
 
-logfile = open(os.path.join(params["desc_dir"], "log.txt"), "w+")
 for count, ppi_pair_id in enumerate(ppi_list):
 
     if len(eval_list) > 0 and ppi_pair_id not in eval_list:
         continue
 
     in_dir = parent_in_dir + ppi_pair_id + "/"
-    print(ppi_pair_id)
+    logger.info(f"Working with {ppi_pair_id}")
 
     out_desc_dir = os.path.join(params["desc_dir"], ppi_pair_id)
     if not os.path.exists(os.path.join(out_desc_dir, "p1_desc_straight.npy")):
         os.mkdir(out_desc_dir)
     #    else:
     #        # Ignore this one as it was already computed.
-    #        print('Ignoring descriptor computation for {} as it was already computed'.format(ppi_pair_id))
+    #        logger.info('Ignoring descriptor computation for {} as it was already computed'.format(ppi_pair_id))
     #        continue
 
     pdbid = ppi_pair_id.split("_")[0]
@@ -106,9 +108,9 @@ for count, ppi_pair_id in enumerate(ppi_list):
             mylabels = labels[0]
             labels = np.median(mylabels, axis=1)
         except Exception as e:
-            print("Could not open " + in_dir + "p1" + "_sc_labels.npy: " + str(e))
+            logger.info("Could not open " + in_dir + "p1" + "_sc_labels.npy: " + str(e))
             continue
-        print("Number of vertices: {}".format(len(labels)))
+        logger.info("Number of vertices: {}".format(len(labels)))
 
         # pos_labels: points that pass the sc_filt.
         pos_labels = np.where(
@@ -145,14 +147,17 @@ for count, ppi_pair_id in enumerate(ppi_list):
     pid = "p1"
     try:
         p1_rho_wrt_center = np.load(in_dir + pid + "_rho_wrt_center.npy")
-    except:
+    except Exception as e:
+        logger.exception(
+            "Could not open " + in_dir + pid + "_rho_wrt_center.npy: " + str(e)
+        )
         continue
     p1_theta_wrt_center = np.load(in_dir + pid + "_theta_wrt_center.npy")
     p1_input_feat = np.load(in_dir + pid + "_input_feat.npy")
     p1_input_feat = mask_input_feat(p1_input_feat, params["feat_mask"])
     p1_mask = np.load(in_dir + pid + "_mask.npy")
     idx1 = np.array(range(len(p1_rho_wrt_center)))
-    print("Data loading time: {:.2f}s".format(time.time() - tic))
+    logger.info("Data loading time: {:.2f}s".format(time.time() - tic))
     tic = time.time()
     desc1_str = compute_val_test_desc(
         learning_obj,
@@ -174,7 +179,7 @@ for count, ppi_pair_id in enumerate(ppi_list):
         batch_size=1000,
         flip=True,
     )
-    print("Running time: {:.2f}s".format(time.time() - tic))
+    logger.info("Running time: {:.2f}s".format(time.time() - tic))
 
     if chain2 != "":
         pid = "p2"
@@ -206,7 +211,7 @@ for count, ppi_pair_id in enumerate(ppi_list):
         )
 
         max_label = np.max(labels)
-        logfile.write("{}: max label: {} \n".format(ppi_pair_id, max_label))
+        logger.info("{}: max label: {} \n".format(ppi_pair_id, max_label))
 
     # Save descriptors
     np.save(os.path.join(out_desc_dir, "p1_desc_straight.npy"), desc1_str)
@@ -230,12 +235,11 @@ for count, ppi_pair_id in enumerate(ppi_list):
         roc_auc = 1.0 - compute_roc_auc(pos_dists, neg_dists)
         all_pos_dists.append(pos_dists)
         all_neg_dists.append(neg_dists)
-        logfile.write(
+        logger.info(
             "{}: ROC AUC: {:.6f}; num pos: {}; mean_pos: {} ; mean_neg: {} \n".format(
                 ppi_pair_id, roc_auc, len(k1), np.mean(pos_dists), np.mean(neg_dists)
             )
         )
-        logfile.flush()
 
         np.random.shuffle(idx2)
         kneg2 = idx2[: len(k2)]
@@ -247,12 +251,11 @@ for count, ppi_pair_id in enumerate(ppi_list):
         roc_auc = 1.0 - compute_roc_auc(pos_dists, neg_dists)
         all_pos_dists_pos_neg.append(pos_dists)
         all_neg_dists_pos_neg.append(neg_dists)
-        logfile.write(
+        logger.info(
             "{}: Pos_neg ROC AUC: {:.6f}; num pos: {}; mean_pos: {} ; mean_neg: {} \n".format(
                 ppi_pair_id, roc_auc, len(k1), np.mean(pos_dists), np.mean(neg_dists)
             )
         )
-        logfile.flush()
 
 
 if len(all_pos_dists) > 0:
@@ -260,7 +263,7 @@ if len(all_pos_dists) > 0:
     all_neg_dists = np.concatenate(all_neg_dists, axis=0)
 
     roc_auc = 1.0 - compute_roc_auc(all_pos_dists, all_neg_dists)
-    logfile.write(
+    logger.info(
         "Global ROC AUC: {:.6f}; num pos: {}\n".format(roc_auc, len(all_pos_dists))
     )
     np.save(params["desc_dir"] + "/all_pos_dists.npy", all_pos_dists)
@@ -269,10 +272,11 @@ if len(all_pos_dists) > 0:
     all_pos_dists_pos_neg = np.concatenate(all_pos_dists_pos_neg, axis=0)
     all_neg_dists_pos_neg = np.concatenate(all_neg_dists_pos_neg, axis=0)
     roc_auc = 1.0 - compute_roc_auc(all_pos_dists_pos_neg, all_neg_dists_pos_neg)
-    logfile.write(
+    logger.info(
         "Global ROC AUC: {:.6f}; num pos: {}\n".format(
             roc_auc, len(all_pos_dists_pos_neg)
         )
     )
     np.save(params["desc_dir"] + "/all_pos_dists_pos_neg.npy", all_pos_dists_pos_neg)
     np.save(params["desc_dir"] + "/all_neg_dists_pos_neg.npy", all_neg_dists_pos_neg)
+    logger.info(f"Saved descriptors to {params['desc_dir']}")
