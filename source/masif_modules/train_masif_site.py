@@ -381,6 +381,6 @@ def train_masif_site(
             np.save(out_dir + "test_scores.npy", flat_all_test_scores)
             np.save(out_dir + "test_names.npy", list_test_names)
 
-    logger.info("Training finished, saving model to: {}".format(out_dir + "model"))
-    tf.saved_model.save(learning_obj.session, out_dir + "saved_model")
-    logger.info("Model saved.")
+    # logger.info("Training finished, saving model to: {}".format(out_dir + "model"))
+    # tf.saved_model.save(learning_obj.session, out_dir + "model")
+    # logger.info("Model saved.")
