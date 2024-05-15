@@ -76,7 +76,7 @@ def train_masif_site(
     testing_list = open(params["testing_list"]).readlines()
     testing_list = [x.rstrip() for x in testing_list]
 
-    data_dirs = os.listdir(params["masif_precomputation_dir"])[0:20]
+    data_dirs = os.listdir(params["masif_precomputation_dir"])
     np.random.shuffle(data_dirs)
     data_dirs = data_dirs
     n_val = len(data_dirs) // 10
