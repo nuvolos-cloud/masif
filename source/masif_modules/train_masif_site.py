@@ -46,6 +46,8 @@ def run_masif_site(
 def compute_roc_auc(pos, neg):
     labels = np.concatenate([np.ones((len(pos))), np.zeros((len(neg)))])
     dist_pairs = np.concatenate([pos, neg])
+    labels = np.nan_to_num(labels)
+    dist_pairs = np.nan_to_num(dist_pairs)
     return metrics.roc_auc_score(labels, dist_pairs)
 
 
@@ -74,7 +76,7 @@ def train_masif_site(
     testing_list = open(params["testing_list"]).readlines()
     testing_list = [x.rstrip() for x in testing_list]
 
-    data_dirs = os.listdir(params["masif_precomputation_dir"])
+    data_dirs = os.listdir(params["masif_precomputation_dir"])[0:20]
     np.random.shuffle(data_dirs)
     data_dirs = data_dirs
     n_val = len(data_dirs) // 10
@@ -207,6 +209,8 @@ def train_masif_site(
                         tf.summary.scalar(
                             "validation_loss", np.mean(training_loss), step=num_iter
                         )
+                    eval_labels = np.nan_to_num(eval_labels)
+                    score = np.nan_to_num(score)
                     auc = metrics.roc_auc_score(eval_labels[:, 0], score)
                     list_val_pos_labels.append(np.sum(iface_labels))
                     list_val_neg_labels.append(len(iface_labels) - np.sum(iface_labels))
@@ -324,6 +328,8 @@ def train_masif_site(
                     [learning_obj.full_score], feed_dict=feed_dict
                 )
                 score = score[0]
+                iface_labels = np.nan_to_num(iface_labels)
+                score = np.nan_to_num(score)
                 auc = metrics.roc_auc_score(iface_labels, score)
                 list_test_auc.append(auc)
                 list_test_names.append((ppi_pair_id, pid))
@@ -346,6 +352,8 @@ def train_masif_site(
         if len(all_test_labels) > 0 and len(all_test_scores) > 0:
             flat_all_test_labels = np.concatenate(all_test_labels, axis=0)
             flat_all_test_scores = np.concatenate(all_test_scores, axis=0)
+            flat_all_test_labels = np.nan_to_num(flat_all_test_labels)
+            flat_all_test_scores = np.nan_to_num(flat_all_test_scores)
             outstr += "Testing auc (all points): {:.2f}".format(
                 metrics.roc_auc_score(flat_all_test_labels, flat_all_test_scores)
             )
