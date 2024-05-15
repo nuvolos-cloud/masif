@@ -240,6 +240,8 @@ def train_masif_site(
                         )
                         tf.summary.scalar("norm_grad", norm_grad, step=num_iter)
 
+                    eval_labels = np.nan_to_num(eval_labels)
+                    score = np.nan_to_num(score)
                     all_training_labels = np.concatenate(
                         [all_training_labels, eval_labels[:, 0]]
                     )
