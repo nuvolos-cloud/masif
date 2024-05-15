@@ -373,8 +373,12 @@ def train_masif_site(
             output_model = out_dir + "model"
             learning_obj.saver.save(learning_obj.session, output_model)
             # Save the scores for test.
-            np.save(out_dir + "test_labels.npy", all_test_labels)
-            np.save(out_dir + "test_scores.npy", all_test_scores)
+            flat_all_test_labels = np.concatenate(all_test_labels, axis=0)
+            flat_all_test_scores = np.concatenate(all_test_scores, axis=0)
+            flat_all_test_labels = np.nan_to_num(flat_all_test_labels)
+            flat_all_test_scores = np.nan_to_num(flat_all_test_scores)
+            np.save(out_dir + "test_labels.npy", flat_all_test_labels)
+            np.save(out_dir + "test_scores.npy", flat_all_test_scores)
             np.save(out_dir + "test_names.npy", list_test_names)
 
     logger.info("Training finished, saving model to: {}".format(out_dir + "model"))
