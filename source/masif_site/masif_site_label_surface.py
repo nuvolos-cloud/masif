@@ -105,6 +105,8 @@ for ppi_pair_id in ppi_pair_ids:
         ground_truth = mymesh.get_attribute("vertex_iface")
         # Compute ROC AUC for this protein.
         try:
+            ground_truth = np.nan_to_num(ground_truth)
+            scores = np.nan_to_num(scores)
             roc_auc = roc_auc_score(ground_truth, scores[0])
             all_roc_auc_scores.append(roc_auc)
             logger.info(
