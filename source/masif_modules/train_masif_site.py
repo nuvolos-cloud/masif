@@ -46,6 +46,10 @@ def run_masif_site(
 def compute_roc_auc(pos, neg):
     labels = np.concatenate([np.ones((len(pos))), np.zeros((len(neg)))])
     dist_pairs = np.concatenate([pos, neg])
+    if np.isnan(eval_labels).any():
+        logger.warning(f"Warning: labels contains NaN")
+    if np.isnan(score).any():
+        logger.warning(f"Warning: score contains NaN")
     labels = np.nan_to_num(labels)
     dist_pairs = np.nan_to_num(dist_pairs)
     return metrics.roc_auc_score(labels, dist_pairs)
@@ -77,12 +81,11 @@ def train_masif_site(
     testing_list = [x.rstrip() for x in testing_list]
 
     data_dirs = os.listdir(params["masif_precomputation_dir"])
-    np.random.shuffle(data_dirs)
-    data_dirs = data_dirs
-    n_val = len(data_dirs) // 10
-    val_dirs = set(data_dirs[(len(data_dirs) - n_val) :])
 
     for num_iter in range(num_iterations):
+        np.random.shuffle(data_dirs)
+        n_val = len(data_dirs) // 10
+        val_dirs = set(data_dirs[(len(data_dirs) - n_val) :])
         # Start training epoch:
         list_training_loss = []
         list_training_auc = []
@@ -105,12 +108,14 @@ def train_masif_site(
         list_test_names = []
         all_test_labels = []
         all_test_scores = []
-
+        
+        p = 0
         for ppi_pair_id in data_dirs:
+            p += 1
             mydir = params["masif_precomputation_dir"] + ppi_pair_id + "/"
             pdbid = ppi_pair_id.split("_")[0]
             chains1 = ppi_pair_id.split("_")[1]
-            logger.info(f"Processing {ppi_pair_id}")
+            logger.info(f"Processing protein no. {p}:  {ppi_pair_id}")
             if len(ppi_pair_id.split("_")) > 2:
                 chains2 = ppi_pair_id.split("_")[2]
             else:
@@ -209,6 +214,10 @@ def train_masif_site(
                         tf.summary.scalar(
                             "validation_loss", np.mean(training_loss), step=num_iter
                         )
+                    if np.isnan(eval_labels).any():
+                        logger.warning(f"Warning: eval_labels contains NaN for {ppi_pair_id} {pid}")
+                    if np.isnan(score).any():
+                        logger.warning(f"Warning: score contains NaN for {ppi_pair_id} {pid}")
                     eval_labels = np.nan_to_num(eval_labels)
                     score = np.nan_to_num(score)
                     auc = metrics.roc_auc_score(eval_labels[:, 0], score)
@@ -244,6 +253,10 @@ def train_masif_site(
                         )
                         tf.summary.scalar("norm_grad", norm_grad, step=num_iter)
 
+                    if np.isnan(eval_labels).any():
+                        logger.warning(f"Warning: eval_labels contains NaN for {ppi_pair_id} {pid}")
+                    if np.isnan(score).any():
+                        logger.warning(f"Warning: score contains NaN for {ppi_pair_id} {pid}")
                     eval_labels = np.nan_to_num(eval_labels)
                     score = np.nan_to_num(score)
                     all_training_labels = np.concatenate(
@@ -328,6 +341,10 @@ def train_masif_site(
                     [learning_obj.full_score], feed_dict=feed_dict
                 )
                 score = score[0]
+                if np.isnan(iface_labels).any():
+                    logger.warning(f"Warning: iface_labels contains NaN for {ppi_pair_id} {pid}")
+                if np.isnan(score).any():
+                    logger.warning(f"Warning: score contains NaN for {ppi_pair_id} {pid}")
                 iface_labels = np.nan_to_num(iface_labels)
                 score = np.nan_to_num(score)
                 auc = metrics.roc_auc_score(iface_labels, score)
