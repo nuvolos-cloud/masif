@@ -82,7 +82,10 @@ def train_masif_site(
 
     data_dirs = os.listdir(params["masif_precomputation_dir"])
 
-    exclude_list = open(params["exclude_list"]).readlines()
+    if "exclude_list" in params:
+        exclude_list = open(params["exclude_list"]).readlines()
+    else:
+        exclude_list = []
     exclude_list = [x.rstrip() for x in exclude_list]
     exclude_set = set(exclude_list)
 
