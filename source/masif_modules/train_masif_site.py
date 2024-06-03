@@ -4,6 +4,7 @@ import logging
 from sklearn import metrics
 import numpy as np
 import tensorflow as tf
+from masif_modules.MaSIF_site import MaSIF_site
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,13 @@ def pad_indices(indices, max_verts):
 
 # Run masif site on a protein, on a previously trained network.
 def run_masif_site(
-    params, learning_obj, rho_wrt_center, theta_wrt_center, input_feat, mask, indices
+    params,
+    learning_obj: MaSIF_site,
+    rho_wrt_center,
+    theta_wrt_center,
+    input_feat,
+    mask,
+    indices,
 ):
 
     indices = pad_indices(indices, mask.shape[1])
@@ -56,7 +63,7 @@ def compute_roc_auc(pos, neg):
 
 
 def train_masif_site(
-    learning_obj,
+    learning_obj: MaSIF_site,
     params,
     batch_size=100,
     num_iterations=100,
@@ -145,6 +152,7 @@ def train_masif_site(
                     logger.info(
                         f"Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels"
                     )
+                    exclude_set.add(ppi_pair_id)
                     continue
                 if (
                     np.sum(iface_labels) > 0.75 * len(iface_labels)
@@ -153,6 +161,7 @@ def train_masif_site(
                     logger.info(
                         f"Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds"
                     )
+                    exclude_set.add(ppi_pair_id)
                     continue
                 count_proteins += 1
 
@@ -225,15 +234,25 @@ def train_masif_site(
                             "validation_loss", np.mean(training_loss), step=num_iter
                         )
                     if np.isnan(eval_labels).any():
-                        logger.warning(
-                            f"Warning: eval_labels contains NaN for {ppi_pair_id} {pid}"
-                        )
                         exclude_set.add(ppi_pair_id)
-                    if np.isnan(score).any():
                         logger.warning(
-                            f"Warning: score contains NaN for {ppi_pair_id} {pid}"
+                            f"Reloading last training checkpoint as eval label for {ppi_pair_id} had NaN..."
                         )
+                        learning_obj.saver.restore(
+                            learning_obj.session, out_dir + "model"
+                        )
+                        continue
+                    elif np.isnan(score).any():
                         exclude_set.add(ppi_pair_id)
+                        logger.warning(
+                            f"Reloading last training checkpoint as eval score for {ppi_pair_id} had NaN..."
+                        )
+                        learning_obj.saver.restore(
+                            learning_obj.session, out_dir + "model"
+                        )
+                        continue
+                    else:
+                        learning_obj.saver.save(learning_obj.session, out_dir + "model")
                     eval_labels = np.nan_to_num(eval_labels)
                     score = np.nan_to_num(score)
                     auc = metrics.roc_auc_score(eval_labels[:, 0], score)
@@ -270,15 +289,25 @@ def train_masif_site(
                         tf.summary.scalar("norm_grad", norm_grad, step=num_iter)
 
                     if np.isnan(eval_labels).any():
-                        logger.warning(
-                            f"Warning: eval_labels contains NaN for {ppi_pair_id} {pid}"
-                        )
                         exclude_set.add(ppi_pair_id)
-                    if np.isnan(score).any():
                         logger.warning(
-                            f"Warning: score contains NaN for {ppi_pair_id} {pid}"
+                            f"Reloading last training checkpoint as training label for {ppi_pair_id} had NaN..."
                         )
+                        learning_obj.saver.restore(
+                            learning_obj.session, out_dir + "model"
+                        )
+                        continue
+                    elif np.isnan(score).any():
                         exclude_set.add(ppi_pair_id)
+                        logger.warning(
+                            f"Reloading last training checkpoint as training score for {ppi_pair_id} had NaN..."
+                        )
+                        learning_obj.saver.restore(
+                            learning_obj.session, out_dir + "model"
+                        )
+                        continue
+                    else:
+                        learning_obj.saver.save(learning_obj.session, out_dir + "model")
                     eval_labels = np.nan_to_num(eval_labels)
                     score = np.nan_to_num(score)
                     all_training_labels = np.concatenate(
@@ -315,6 +344,7 @@ def train_masif_site(
                     logger.info(
                         f"Skipping {mydir + pid + '_iface_labels.npy'} because it has too many labels"
                     )
+                    exclude_set.add(ppi_pair_id)
                     continue
                 if (
                     np.sum(iface_labels) > 0.75 * len(iface_labels)
@@ -323,6 +353,7 @@ def train_masif_site(
                     logger.info(
                         f"Skipping {mydir + pid + '_iface_labels.npy'} because label sum is out of bounds"
                     )
+                    exclude_set.add(ppi_pair_id)
                     continue
                 count_proteins += 1
 
@@ -373,6 +404,10 @@ def train_masif_site(
                         f"Warning: score contains NaN for {ppi_pair_id} {pid}"
                     )
                     exclude_set.add(ppi_pair_id)
+                    logger.warning(
+                        "Reloading last training checkpoint as testing score had NaN..."
+                    )
+                    learning_obj.saver.restore(learning_obj.session, out_dir + "model")
                 iface_labels = np.nan_to_num(iface_labels)
                 score = np.nan_to_num(score)
                 auc = metrics.roc_auc_score(iface_labels, score)
