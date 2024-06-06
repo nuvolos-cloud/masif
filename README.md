@@ -28,12 +28,15 @@
 
 This repository has been updated to work with Nuvolos. The following changes have been made:
 
-* Python 3.6 has been replaced with Python 3.10
-* PyMesh has been updated to 0.3.1 built for Python 3.10
-* Latest Open3D has been installed
-* Latest APBS and MultiValue has been installed
-* Model training code for `masif_site` and tthe pre-trained model checkpoint have been updated to work with TensorFlow 2.16
-* Fixes for PDB file retrieval and processing
+* Python 3.6 has been replaced with Python 3.10,
+* PyMesh has been updated to 0.3.1 built for Python 3.10,
+* The latest Open3D has been installed,
+* Latest APBS and MultiValue have been installed,
+* Model training code for `masif_site` has been made more robust,
+* `masif_site` model has been re-trained with TensorFlow 2.16,
+* Added file and console logging instead of `print()` statements,
+* Fixes for PDB file retrieval and processing,
+* Code formatted with `black`
 
 ## Description
 
