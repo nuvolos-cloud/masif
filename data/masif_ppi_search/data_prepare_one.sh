@@ -1,3 +1,4 @@
+#!/bin/bash
 masif_root=$(git rev-parse --show-toplevel)
 masif_source=$masif_root/source/
 export PYTHONPATH=$PYTHONPATH:$masif_source
