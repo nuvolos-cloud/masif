@@ -19,7 +19,10 @@ def run_script(protein_name):
     Function to run the data_prepare_one.sh script with a given protein name.
     """
     # Construct the command to execute the shell script with the protein name
-    command = ["./data_prepare_one.sh", protein_name]
+    command = [
+        os.path.join(os.path.dirname(__file__), "data_prepare_one.sh"),
+        protein_name,
+    ]
 
     # Execute the command
     subprocess.run(command, check=True)
@@ -27,7 +30,9 @@ def run_script(protein_name):
 
 def main():
     # Path to the file containing the list of protein names
-    protein_list_file = os.path.abspath(os.getenv("PROTEIN_LIST_FILE", "./lists/fullist.txt"))
+    protein_list_file = os.path.abspath(
+        os.getenv("PROTEIN_LIST_FILE", "./lists/fullist.txt")
+    )
 
     # Get the list of proteins already prepared
     prepared_proteins = os.listdir(masif_opts["site"]["masif_precomputation_dir"])
