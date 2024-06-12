@@ -27,17 +27,7 @@ def run_script(protein_name):
 
 def main():
     # Path to the file containing the list of protein names
-    protein_list_file = os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "..",
-            "data",
-            "masif_site",
-            "lists",
-            "masif_site_only.txt",
-        )
-    )
+    protein_list_file = os.path.abspath(os.getenv["PROTEIN_LIST_FILE"])
 
     # Get the list of proteins already prepared
     prepared_proteins = os.listdir(masif_opts["site"]["masif_precomputation_dir"])

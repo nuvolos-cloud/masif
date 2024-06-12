@@ -300,11 +300,12 @@ class MaSIF_ppi_search:
                 )
 
                 # Refine global_desc with a FC layer.
-                self.global_desc = tf.keras.layers.Dense(
-                    self.n_thetas * self.n_rhos, activation=tf.identity
-                )(
-                    self.global_desc
-                )  # batch_size, n_thetas * n_rhos
+                self.global_desc = tf.compat.v1.layers.dense(
+                    self.global_desc,
+                    self.n_thetas * self.n_rhos,
+                    activation=tf.identity,
+                    name="fully_connected",
+                )
 
                 # compute data loss
                 self.n_patches = tf.shape(self.global_desc)[0] // 4

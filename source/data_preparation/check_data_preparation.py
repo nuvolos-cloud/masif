@@ -18,15 +18,19 @@ dir_to_check = masif_opts["site"]["masif_precomputation_dir"]
 # Iterate over the subdirectories
 for subdir in os.listdir(dir_to_check):
     subdir_path = os.path.join(dir_to_check, subdir)
-    
+
     # Check if it's a directory
     if os.path.isdir(subdir_path):
         # Check for the required files
-        required_files = ['*_X.npy', '*_list_indices.npy', '*_input_feat.npy']
-        missing_files = [rf for rf in required_files if not glob.glob(os.path.join(subdir_path, rf))]
-        
+        required_files = ["*_X.npy", "*_list_indices.npy", "*_input_feat.npy"]
+        missing_files = [
+            rf for rf in required_files if not glob.glob(os.path.join(subdir_path, rf))
+        ]
+
         # If any files are missing, log an error and delete the subdirectory
         if missing_files:
-            logging.error(f"Missing files {missing_files} in subdirectory {subdir_path}")
+            logging.error(
+                f"Missing files {missing_files} in subdirectory {subdir_path}"
+            )
             shutil.rmtree(subdir_path)
             continue

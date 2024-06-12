@@ -107,18 +107,24 @@ for ppi_pair_id in ppi_pair_ids:
         try:
             ground_truth = np.nan_to_num(ground_truth)
             scores = np.nan_to_num(scores)
-            roc_auc = roc_auc_score(ground_truth, scores[0])
-            all_roc_auc_scores.append(roc_auc)
-            logger.info(
-                "ROC AUC score for protein {} : {:.2f} ".format(
-                    pdbid + "_" + chains[ix], roc_auc
+
+            if len(np.unique(ground_truth)) > 1:
+                roc_auc = roc_auc_score(ground_truth, scores[0])
+                all_roc_auc_scores.append(roc_auc)
+                logger.info(
+                    "ROC AUC score for protein {} : {:.2f} ".format(
+                        pdbid + "_" + chains[ix], roc_auc
+                    )
                 )
-            )
+            else:
+                logger.warning(
+                    "Only one class present in ground truth for protein {}. ROC AUC score cannot be calculated.".format(
+                        pdbid + "_" + chains[ix]
+                    )
+                )
+                logger.warning("Ground truth: {}".format(ground_truth))
         except Exception as e:
-            logger.exception(
-                "No ROC AUC computed for protein (possibly, no ground truth defined in input)",
-                e,
-            )
+            logger.exception("An error occurred while calculating ROC AUC score.", e)
 
         mymesh.remove_attribute("vertex_iface")
         mymesh.add_attribute("iface")

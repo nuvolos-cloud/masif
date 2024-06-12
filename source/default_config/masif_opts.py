@@ -47,19 +47,17 @@ masif_opts["ppi_search"]["training_list"] = "lists/training.txt"
 masif_opts["ppi_search"]["testing_list"] = "lists/testing.txt"
 masif_opts["ppi_search"]["max_shape_size"] = 200
 masif_opts["ppi_search"]["max_distance"] = 12.0  # Radius for the neural network.
-masif_opts["ppi_search"][
-    "masif_precomputation_dir"
-] = "/files/masif_data/data_preparation/04b-precomputation_12A/precomputation/"
+masif_opts["ppi_search"]["masif_precomputation_dir"] = "/masif_data/precomputation/"
 masif_opts["ppi_search"]["feat_mask"] = [1.0] * 5
 masif_opts["ppi_search"]["max_sc_filt"] = 1.0
 masif_opts["ppi_search"]["min_sc_filt"] = 0.5
 masif_opts["ppi_search"]["pos_surf_accept_probability"] = 1.0
 masif_opts["ppi_search"]["pos_interface_cutoff"] = 1.0
 masif_opts["ppi_search"]["range_val_samples"] = 0.9  # 0.9 to 1.0
-masif_opts["ppi_search"]["cache_dir"] = "/files/masif_data/nn_models/sc05/cache/"
+masif_opts["ppi_search"]["cache_dir"] = "/masif_data/nn_models/sc05/cache/"
 masif_opts["ppi_search"][
     "model_dir"
-] = "/files/masif_data/nn_models/sc05/all_feat/model_data/"
+] = "/masif_data/nn_models/sc05/all_feat/model_data/"
 masif_opts["ppi_search"]["desc_dir"] = "descriptors/sc05/all_feat/"
 masif_opts["ppi_search"]["gif_descriptors_out"] = "gif_descriptors/"
 # Parameters for shape complementarity calculations.
