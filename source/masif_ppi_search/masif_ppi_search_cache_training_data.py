@@ -123,28 +123,35 @@ for count, ppi_pair_id in enumerate(os.listdir(parent_in_dir)):
     for ii in k1:
         pos_names.append("{}_{}_{}".format(ppi_pair_id, pid, ii))
 
-    rho_wrt_center = np.load(in_dir + pid + "_rho_wrt_center.npy")
-    theta_wrt_center = np.load(in_dir + pid + "_theta_wrt_center.npy")
-    input_feat = np.load(in_dir + pid + "_input_feat.npy")
-    mask = np.load(in_dir + pid + "_mask.npy")
+    try:
+        rho_wrt_center = np.load(in_dir + pid + "_rho_wrt_center.npy")
+        theta_wrt_center = np.load(in_dir + pid + "_theta_wrt_center.npy")
+        input_feat = np.load(in_dir + pid + "_input_feat.npy")
+        mask = np.load(in_dir + pid + "_mask.npy")
 
-    binder_rho_wrt_center.append(rho_wrt_center[k1])
-    binder_theta_wrt_center.append(theta_wrt_center[k1])
-    binder_input_feat.append(input_feat[k1])
-    binder_mask.append(mask[k1])
+        binder_rho_wrt_center.append(rho_wrt_center[k1])
+        binder_theta_wrt_center.append(theta_wrt_center[k1])
+        binder_input_feat.append(input_feat[k1])
+        binder_mask.append(mask[k1])
 
-    # Read pos, which is p2.
-    pid = "p2"
+        # Read pos, which is p2.
+        pid = "p2"
 
-    # Read as positives those points.
-    rho_wrt_center = np.load(in_dir + pid + "_rho_wrt_center.npy")
-    theta_wrt_center = np.load(in_dir + pid + "_theta_wrt_center.npy")
-    input_feat = np.load(in_dir + pid + "_input_feat.npy")
-    mask = np.load(in_dir + pid + "_mask.npy")
-    pos_rho_wrt_center.append(rho_wrt_center[k2])
-    pos_theta_wrt_center.append(theta_wrt_center[k2])
-    pos_input_feat.append(input_feat[k2])
-    pos_mask.append(mask[k2])
+        # Read as positives those points.
+        rho_wrt_center = np.load(in_dir + pid + "_rho_wrt_center.npy").reshape(-1, 200)
+        theta_wrt_center = np.load(in_dir + pid + "_theta_wrt_center.npy")
+        input_feat = np.load(in_dir + pid + "_input_feat.npy")
+        mask = np.load(in_dir + pid + "_mask.npy")
+        pos_rho_wrt_center.append(rho_wrt_center[k2])
+        pos_theta_wrt_center.append(theta_wrt_center[k2])
+        pos_input_feat.append(input_feat[k2])
+        pos_mask.append(mask[k2])
+    except ValueError as e:
+        logger.error(f"Data error while processing {ppi_pair_id}: {e}")
+        continue
+    except Exception as e:
+        logger.error(f"Error while processing {ppi_pair_id}: {e}")
+        continue
 
     # Get a set of negatives from  p2.
     np.random.shuffle(k_neg2)
