@@ -184,7 +184,7 @@ binder_rho_wrt_center = np.concatenate(binder_rho_wrt_center, axis=0).reshape(
     -1, binder_rho_wrt_center.shape[1]
 )
 binder_theta_wrt_center = np.concatenate(binder_theta_wrt_center, axis=0).reshape(
-    -1, binder_rho_wrt_center.shape[1]
+    -1, binder_theta_wrt_center.shape[1]
 )
 binder_input_feat = np.concatenate(binder_input_feat, axis=0)
 binder_mask = np.concatenate(binder_mask, axis=0)
