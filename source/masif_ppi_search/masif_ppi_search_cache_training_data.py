@@ -180,12 +180,10 @@ for count, ppi_pair_id in enumerate(os.listdir(parent_in_dir)):
 if not os.path.exists(params["cache_dir"]):
     os.makedirs(params["cache_dir"])
 
-binder_rho_wrt_center = np.concatenate(binder_rho_wrt_center, axis=0).reshape(
-    -1, binder_rho_wrt_center.shape[1]
-)
-binder_theta_wrt_center = np.concatenate(binder_theta_wrt_center, axis=0).reshape(
-    -1, binder_theta_wrt_center.shape[1]
-)
+binder_rho_wrt_center = binder_rho_wrt_center.reshape(-1, binder_rho_wrt_center.shape[1])
+binder_rho_wrt_center = np.concatenate(binder_rho_wrt_center, axis=0)
+binder_theta_wrt_center = binder_theta_wrt_center.reshape(-1, binder_theta_wrt_center.shape[1])
+binder_theta_wrt_center = np.concatenate(binder_theta_wrt_center, axis=0)
 binder_input_feat = np.concatenate(binder_input_feat, axis=0)
 binder_mask = np.concatenate(binder_mask, axis=0)
 
