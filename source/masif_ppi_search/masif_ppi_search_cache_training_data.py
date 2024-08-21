@@ -180,12 +180,12 @@ for count, ppi_pair_id in enumerate(os.listdir(parent_in_dir)):
 if not os.path.exists(params["cache_dir"]):
     os.makedirs(params["cache_dir"])
 
-max_shape = max([arr.shape for arr in binder_rho_wrt_center], key=lambda x: x[0])  # Example for 1D arrays
-binder_rho_wrt_center = [np.pad(arr, (0, max_shape[0] - len(arr)), 'constant') if arr.shape != max_shape else arr for arr in binder_rho_wrt_center]
+max_shape = max(arr.shape[1] for arr in binder_rho_wrt_center)
+binder_rho_wrt_center = [np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), 'constant') for arr in binder_rho_wrt_center]
 binder_rho_wrt_center = np.concatenate(binder_rho_wrt_center, axis=0)
 
-max_shape = max([arr.shape for arr in binder_theta_wrt_center], key=lambda x: x[0])  # Example for 1D arrays
-binder_theta_wrt_center = [np.pad(arr, (0, max_shape[0] - len(arr)), 'constant') if arr.shape != max_shape else arr for arr in binder_theta_wrt_center]
+max_shape = max(arr.shape[1] for arr in binder_theta_wrt_center)
+binder_theta_wrt_center = [np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), 'constant') for arr in binder_theta_wrt_center]
 binder_theta_wrt_center = np.concatenate(binder_theta_wrt_center, axis=0)
 binder_input_feat = np.concatenate(binder_input_feat, axis=0)
 binder_mask = np.concatenate(binder_mask, axis=0)
