@@ -199,6 +199,8 @@ binder_theta_wrt_center = np.concatenate(binder_theta_wrt_center, axis=0)
 max_shape = max(arr.shape[1] for arr in binder_input_feat)
 binder_input_feat = [
     np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    if arr.shape[1] < max_shape
+    else arr
     for arr in binder_input_feat
 ]
 binder_input_feat = np.concatenate(binder_input_feat, axis=0)
