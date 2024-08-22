@@ -3,6 +3,8 @@ import sys
 import importlib
 import os
 import logging
+from collections import defaultdict
+
 import pymesh
 import numpy as np
 from scipy.spatial import cKDTree
@@ -181,24 +183,86 @@ if not os.path.exists(params["cache_dir"]):
     os.makedirs(params["cache_dir"])
 
 max_shape = max(arr.shape[1] for arr in binder_rho_wrt_center)
-binder_rho_wrt_center = [np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), 'constant') for arr in binder_rho_wrt_center]
+binder_rho_wrt_center = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    for arr in binder_rho_wrt_center
+]
 binder_rho_wrt_center = np.concatenate(binder_rho_wrt_center, axis=0)
 
 max_shape = max(arr.shape[1] for arr in binder_theta_wrt_center)
-binder_theta_wrt_center = [np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), 'constant') for arr in binder_theta_wrt_center]
+binder_theta_wrt_center = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    for arr in binder_theta_wrt_center
+]
 binder_theta_wrt_center = np.concatenate(binder_theta_wrt_center, axis=0)
+
+max_shape = max(arr.shape[1] for arr in binder_input_feat)
+binder_input_feat = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    for arr in binder_input_feat
+]
 binder_input_feat = np.concatenate(binder_input_feat, axis=0)
+
+max_shape = max(arr.shape[1] for arr in binder_mask)
+binder_mask = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    for arr in binder_mask
+]
 binder_mask = np.concatenate(binder_mask, axis=0)
 
+max_shape = max(arr.shape[1] for arr in pos_rho_wrt_center)
+pos_rho_wrt_center = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    for arr in pos_rho_wrt_center
+]
 pos_rho_wrt_center = np.concatenate(pos_rho_wrt_center, axis=0)
+
+max_shape = max(arr.shape[1] for arr in pos_theta_wrt_center)
+pos_theta_wrt_center = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    for arr in pos_theta_wrt_center
+]
 pos_theta_wrt_center = np.concatenate(pos_theta_wrt_center, axis=0)
+
+max_shape = max(arr.shape[1] for arr in pos_input_feat)
+pos_input_feat = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    for arr in pos_input_feat
+]
 pos_input_feat = np.concatenate(pos_input_feat, axis=0)
+
+max_shape = max(arr.shape[1] for arr in pos_mask)
+pos_mask = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant") for arr in pos_mask
+]
 pos_mask = np.concatenate(pos_mask, axis=0)
 np.save(params["cache_dir"] + "/pos_names.npy", pos_names)
 
+max_shape = max(arr.shape[1] for arr in neg_rho_wrt_center)
+neg_rho_wrt_center = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    for arr in neg_rho_wrt_center
+]
 neg_rho_wrt_center = np.concatenate(neg_rho_wrt_center, axis=0)
+
+max_shape = max(arr.shape[1] for arr in neg_theta_wrt_center)
+neg_theta_wrt_center = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    for arr in neg_theta_wrt_center
+]
 neg_theta_wrt_center = np.concatenate(neg_theta_wrt_center, axis=0)
+
+max_shape = max(arr.shape[1] for arr in neg_input_feat)
+neg_input_feat = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    for arr in neg_input_feat
+]
 neg_input_feat = np.concatenate(neg_input_feat, axis=0)
+
+max_shape = max(arr.shape[1] for arr in neg_mask)
+neg_mask = [
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant") for arr in neg_mask
+]
 neg_mask = np.concatenate(neg_mask, axis=0)
 np.save(params["cache_dir"] + "/neg_names.npy", neg_names)
 
