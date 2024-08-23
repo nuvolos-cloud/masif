@@ -131,13 +131,15 @@ for count, ppi_pair_id in enumerate(os.listdir(parent_in_dir)):
         input_feat = np.load(in_dir + pid + "_input_feat.npy")
         mask = np.load(in_dir + pid + "_mask.npy")
 
-        logger.info("rho_wrt_center shape: {}".format(rho_wrt_center.shape))
+        logger.debug("rho_wrt_center shape: {}".format(rho_wrt_center.shape))
         binder_rho_wrt_center.append(rho_wrt_center[k1])
-        logger.info("theta_wrt_center shape: {}".format(theta_wrt_center.shape))
+        logger.debug("theta_wrt_center shape: {}".format(theta_wrt_center.shape))
         binder_theta_wrt_center.append(theta_wrt_center[k1])
-        logger.info("input_feat shape: {}".format(input_feat.shape))
+        logger.debug("input_feat shape: {}".format(input_feat.shape))
+        if input_feat.shape[1] != 200:
+            logger.warning("input_feat shape: {}".format(input_feat.shape))
         binder_input_feat.append(input_feat[k1])
-        logger.info("mask shape: {}".format(mask.shape))
+        logger.debug("mask shape: {}".format(mask.shape))
         binder_mask.append(mask[k1])
 
         # Read pos, which is p2.
@@ -203,9 +205,7 @@ binder_theta_wrt_center = np.concatenate(binder_theta_wrt_center, axis=0)
 logger.info("binder_input_feat shape: {}".format(binder_input_feat.shape))
 max_shape = max(arr.shape[1] for arr in binder_input_feat)
 binder_input_feat = [
-    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
-    if arr.shape[1] < max_shape
-    else arr
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1]), (0, 0)), "constant")
     for arr in binder_input_feat
 ]
 binder_input_feat = np.concatenate(binder_input_feat, axis=0)
