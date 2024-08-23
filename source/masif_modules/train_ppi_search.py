@@ -243,8 +243,6 @@ def train_ppi_search(
         c_pos_training_idx = pos_training_idx_copy[: batch_size // 4]
         c_neg_training_idx = neg_training_idx_copy[: batch_size // 4]
 
-        c_neg_training_idx_2 = None
-
         # Features and theta are flipped for the binder in construct_batch (except for hydrophobicity).
         (
             batch_rho_coords,
@@ -266,7 +264,6 @@ def train_ppi_search(
             neg_theta_wrt_center,
             neg_input_feat,
             neg_mask,
-            c_neg_training_idx_2,
         )
 
         assert len(batch_rho_coords) == batch_size
