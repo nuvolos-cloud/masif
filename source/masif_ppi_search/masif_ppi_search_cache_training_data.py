@@ -131,10 +131,13 @@ for count, ppi_pair_id in enumerate(os.listdir(parent_in_dir)):
         input_feat = np.load(in_dir + pid + "_input_feat.npy")
         mask = np.load(in_dir + pid + "_mask.npy")
 
+        logger.info("rho_wrt_center shape: {}".format(rho_wrt_center.shape))
         binder_rho_wrt_center.append(rho_wrt_center[k1])
+        logger.info("theta_wrt_center shape: {}".format(theta_wrt_center.shape))
         binder_theta_wrt_center.append(theta_wrt_center[k1])
         logger.info("input_feat shape: {}".format(input_feat.shape))
         binder_input_feat.append(input_feat[k1])
+        logger.info("mask shape: {}".format(mask.shape))
         binder_mask.append(mask[k1])
 
         # Read pos, which is p2.
