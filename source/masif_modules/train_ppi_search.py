@@ -201,8 +201,8 @@ def train_ppi_search(
     neg_theta_wrt_center,
     neg_input_feat,
     neg_mask,
-    num_iterations=1000000,
-    num_iter_test=1000,
+    num_iterations=4, # 1000000
+    num_iter_test=2, # 1000
     batch_size=32,
     batch_size_val_test=1000,
 ):
@@ -295,6 +295,7 @@ def train_ppi_search(
                 ],
                 feed_dict=feed_dict,
             )
+            logger.info("Iteration {} training loss: {}\n".format(num_iter, training_loss))
 
         n = len(score) // 2
         try:
@@ -306,6 +307,13 @@ def train_ppi_search(
         iter_pos_score = np.concatenate([pos_score, iter_pos_score], axis=0)
         iter_neg_score = np.concatenate([neg_score, iter_neg_score], axis=0)
         list_training_loss.append(training_loss)
+
+        if np.isnan(iter_pos_score).any():
+            logger.warning("Warning: iter_pos_score contains NaN")
+        if np.isnan(iter_neg_score).any():
+            logger.warning("Warning: iter_neg_score contains NaN")
+        if np.isnan(list_training_loss).any():
+            logger.warning("Warning: list_training_loss contains NaN")
 
         if num_iter % num_iter_test == 0:
             logger.info("Validating and testing.\n ")
