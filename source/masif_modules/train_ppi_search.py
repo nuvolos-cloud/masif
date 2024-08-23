@@ -3,7 +3,6 @@ import sys
 import logging
 from sklearn import metrics
 import numpy as np
-import tensorflow as tf
 
 logger = logging.getLogger(__name__)
 
@@ -201,8 +200,8 @@ def train_ppi_search(
     neg_theta_wrt_center,
     neg_input_feat,
     neg_mask,
-    num_iterations=100, # 1000000
-    num_iter_test=10, # 1000
+    num_iterations=1000,  # 1000000
+    num_iter_test=10,  # 1000
     batch_size=32,
     batch_size_val_test=1000,
 ):
@@ -285,6 +284,7 @@ def train_ppi_search(
                 [learning_obj.score], feed_dict=feed_dict
             )
             training_loss = 0
+            iter_time.append(time.time() - tic)
         else:
             _, training_loss, norm_grad, score = learning_obj.session.run(
                 [
@@ -295,19 +295,18 @@ def train_ppi_search(
                 ],
                 feed_dict=feed_dict,
             )
-            logger.info("Iteration {} training loss: {}\n".format(num_iter, training_loss))
+            logger.info(
+                "Iteration {} training loss: {}\n".format(num_iter, training_loss)
+            )
+            iter_time.append(time.time() - tic)
 
         if np.isnan(score).any():
             logger.warning("Warning: score contains NaN, reloading last checkpoint.")
-            learning_obj.saver.restore(
-                learning_obj.session, out_dir + "model"
-            )
+            learning_obj.saver.restore(learning_obj.session, out_dir + "model")
             continue
         if np.isnan(training_loss):
             logger.warning("Warning: training_loss is NaN")
-            learning_obj.saver.restore(
-                learning_obj.session, out_dir + "model"
-            )
+            learning_obj.saver.restore(learning_obj.session, out_dir + "model")
             continue
 
         n = len(score) // 2
@@ -351,9 +350,8 @@ def train_ppi_search(
 
             training_time_entry = time.time() - tic
             logger.info(
-                "Training 1000 entry took {:.2f}s \n".format(training_time_entry)
+                "Training {} entries took {}".format(num_iter_test, training_time_entry)
             )
-            logger.info("Training 1000 entries took {}".format(training_time_entry))
 
             tic = time.time()
             # Compute validation descriptors.
@@ -462,13 +460,7 @@ def train_ppi_search(
             test_time = time.time() - tic
             logger.info("Iteration {} test roc auc: {}\n".format(num_iter, test_auc))
             logger.info(
-                "Iteration time: {} validation time: {} test time: {}\n".format(
-                    np.mean(iter_time), val_time, test_time
-                )
-            )
-            logger.info("Iteration {} test roc auc: {}".format(num_iter, test_auc))
-            logger.info(
-                "Iteration time: {} validation time: {} test time: {}".format(
+                "Iteration mean time: {} validation time: {} test time: {}\n".format(
                     np.mean(iter_time), val_time, test_time
                 )
             )
