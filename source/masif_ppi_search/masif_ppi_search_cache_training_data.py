@@ -232,7 +232,7 @@ pos_theta_wrt_center = np.concatenate(pos_theta_wrt_center, axis=0)
 
 max_shape = max(arr.shape[1] for arr in pos_input_feat)
 pos_input_feat = [
-    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1]), (0,0)), "constant")
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1]), (0, 0)), "constant")
     for arr in pos_input_feat
 ]
 pos_input_feat = np.concatenate(pos_input_feat, axis=0)
@@ -260,7 +260,7 @@ neg_theta_wrt_center = np.concatenate(neg_theta_wrt_center, axis=0)
 
 max_shape = max(arr.shape[1] for arr in neg_input_feat)
 neg_input_feat = [
-    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
+    np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1]), (0, 0)), "constant")
     for arr in neg_input_feat
 ]
 neg_input_feat = np.concatenate(neg_input_feat, axis=0)
