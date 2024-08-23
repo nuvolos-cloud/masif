@@ -202,7 +202,6 @@ binder_theta_wrt_center = [
 ]
 binder_theta_wrt_center = np.concatenate(binder_theta_wrt_center, axis=0)
 
-logger.info("binder_input_feat shape: {}".format(binder_input_feat.shape))
 max_shape = max(arr.shape[1] for arr in binder_input_feat)
 binder_input_feat = [
     np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1]), (0, 0)), "constant")
