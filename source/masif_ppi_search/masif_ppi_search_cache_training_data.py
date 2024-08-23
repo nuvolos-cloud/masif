@@ -133,6 +133,7 @@ for count, ppi_pair_id in enumerate(os.listdir(parent_in_dir)):
 
         binder_rho_wrt_center.append(rho_wrt_center[k1])
         binder_theta_wrt_center.append(theta_wrt_center[k1])
+        logger.info("input_feat shape: {}".format(input_feat.shape))
         binder_input_feat.append(input_feat[k1])
         binder_mask.append(mask[k1])
 
@@ -196,6 +197,7 @@ binder_theta_wrt_center = [
 ]
 binder_theta_wrt_center = np.concatenate(binder_theta_wrt_center, axis=0)
 
+logger.info("binder_input_feat shape: {}".format(binder_input_feat.shape))
 max_shape = max(arr.shape[1] for arr in binder_input_feat)
 binder_input_feat = [
     np.pad(arr, ((0, 0), (0, max_shape - arr.shape[1])), "constant")
