@@ -201,8 +201,8 @@ def train_ppi_search(
     neg_theta_wrt_center,
     neg_input_feat,
     neg_mask,
-    num_iterations=4, # 1000000
-    num_iter_test=2, # 1000
+    num_iterations=100, # 1000000
+    num_iter_test=10, # 1000
     batch_size=32,
     batch_size_val_test=1000,
 ):
@@ -296,6 +296,19 @@ def train_ppi_search(
                 feed_dict=feed_dict,
             )
             logger.info("Iteration {} training loss: {}\n".format(num_iter, training_loss))
+
+        if np.isnan(score).any():
+            logger.warning("Warning: score contains NaN, reloading last checkpoint.")
+            learning_obj.saver.restore(
+                learning_obj.session, out_dir + "model"
+            )
+            continue
+        if np.isnan(training_loss):
+            logger.warning("Warning: training_loss is NaN")
+            learning_obj.saver.restore(
+                learning_obj.session, out_dir + "model"
+            )
+            continue
 
         n = len(score) // 2
         try:
@@ -477,7 +490,3 @@ def train_ppi_search(
                 np.save(out_dir + "neg_desc.npy", neg_desc)
                 np.save(out_dir + "neg_test_idx.npy", neg_test_idx)
                 np.save(out_dir + "neg_desc_2.npy", neg_desc_2)
-
-    logger.info("Training finished, saving model to: {}".format(out_dir + "model"))
-    tf.saved_model.save(learning_obj.session, out_dir + "saved_model")
-    logger.info("Model saved.")
