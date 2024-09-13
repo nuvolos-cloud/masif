@@ -200,8 +200,8 @@ def train_ppi_search(
     neg_theta_wrt_center,
     neg_input_feat,
     neg_mask,
-    num_iterations=1000,  # 1000000
-    num_iter_test=10,  # 1000
+    num_iterations=10000,  # 1000000
+    num_iter_test=100,  # 1000
     batch_size=32,
     batch_size_val_test=1000,
 ):
