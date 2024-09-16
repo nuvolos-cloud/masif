@@ -332,7 +332,7 @@ For the paper we trained for about 40 hours. The neural network model is saved  
 Once the neural network has been trained and saved, descriptors for specific proteins can be computed using the command: 
 
 ```
-./compute_descriptors.sh lists/testing.txt
+./compute_descriptors.sh -l lists/testing.txt
 ```
 
 These descriptors are saved under the descriptors/ directory.
