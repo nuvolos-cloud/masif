@@ -21,6 +21,12 @@ def mask_input_feat(input_feat, mask):
 def compute_roc_auc(pos, neg):
     labels = np.concatenate([np.ones((len(pos))), np.zeros((len(neg)))])
     dist_pairs = np.concatenate([pos, neg])
+    if np.isnan(labels).any():
+        logger.warning("Warning: labels contains NaN")
+    if np.isnan(labels).any():
+        logger.warning("Warning: score contains NaN")
+    labels = np.nan_to_num(labels)
+    dist_pairs = np.nan_to_num(dist_pairs)
     return metrics.roc_auc_score(labels, dist_pairs)
 
 
