@@ -13,6 +13,8 @@ Released under an Apache License 2.0
 """
 
 logger = logging.getLogger(__name__)
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+tf.compat.v1.disable_v2_behavior()
 
 
 config = tf.compat.v1.ConfigProto()
@@ -119,49 +121,49 @@ all_idxs = np.concatenate(
 )
 
 # Model definition
-reg = keras.regularizers.l2(l=0.0)
-model = keras.models.Sequential()
-model.add(keras.layers.Conv1D(filters=8, kernel_size=1, strides=1))
-model.add(keras.layers.BatchNormalization())
-model.add(keras.layers.ReLU())
-model.add(keras.layers.Conv1D(filters=16, kernel_size=1, strides=1))
-model.add(keras.layers.BatchNormalization())
-model.add(keras.layers.ReLU())
-model.add(keras.layers.Conv1D(filters=32, kernel_size=1, strides=1))
-model.add(keras.layers.BatchNormalization())
-model.add(keras.layers.ReLU())
-model.add(keras.layers.Conv1D(filters=64, kernel_size=1, strides=1))
-model.add(keras.layers.BatchNormalization())
-model.add(keras.layers.ReLU())
-model.add(keras.layers.Conv1D(filters=128, kernel_size=1, strides=1))
-model.add(keras.layers.BatchNormalization())
-model.add(keras.layers.ReLU())
-model.add(keras.layers.Conv1D(filters=256, kernel_size=1, strides=1))
-model.add(keras.layers.BatchNormalization())
-model.add(keras.layers.ReLU())
-model.add(keras.layers.GlobalAveragePooling1D())
-model.add(keras.layers.Dense(128, activation=tf.nn.relu, kernel_regularizer=reg))
-model.add(keras.layers.Dense(64, activation=tf.nn.relu, kernel_regularizer=reg))
-model.add(keras.layers.Dense(32, activation=tf.nn.relu, kernel_regularizer=reg))
-model.add(keras.layers.Dense(16, activation=tf.nn.relu, kernel_regularizer=reg))
-model.add(keras.layers.Dense(8, activation=tf.nn.relu, kernel_regularizer=reg))
-model.add(keras.layers.Dense(4, activation=tf.nn.relu, kernel_regularizer=reg))
-model.add(keras.layers.Dense(2, activation="softmax"))
+reg = tf.compat.v1.keras.regularizers.l2(l=0.0)
+model = tf.compat.v1.keras.models.Sequential()
+model.add(tf.compat.v1.keras.layers.Conv1D(filters=8, kernel_size=1, strides=1))
+model.add(tf.compat.v1.keras.layers.BatchNormalization())
+model.add(tf.compat.v1.keras.layers.ReLU())
+model.add(tf.compat.v1.keras.layers.Conv1D(filters=16, kernel_size=1, strides=1))
+model.add(tf.compat.v1.keras.layers.BatchNormalization())
+model.add(tf.compat.v1.keras.layers.ReLU())
+model.add(tf.compat.v1.keras.layers.Conv1D(filters=32, kernel_size=1, strides=1))
+model.add(tf.compat.v1.keras.layers.BatchNormalization())
+model.add(tf.compat.v1.keras.layers.ReLU())
+model.add(tf.compat.v1.keras.layers.Conv1D(filters=64, kernel_size=1, strides=1))
+model.add(tf.compat.v1.keras.layers.BatchNormalization())
+model.add(tf.compat.v1.keras.layers.ReLU())
+model.add(tf.compat.v1.keras.layers.Conv1D(filters=128, kernel_size=1, strides=1))
+model.add(tf.compat.v1.keras.layers.BatchNormalization())
+model.add(tf.compat.v1.keras.layers.ReLU())
+model.add(tf.compat.v1.keras.layers.Conv1D(filters=256, kernel_size=1, strides=1))
+model.add(tf.compat.v1.keras.layers.BatchNormalization())
+model.add(tf.compat.v1.keras.layers.ReLU())
+model.add(tf.compat.v1.keras.layers.GlobalAveragePooling1D())
+model.add(tf.compat.v1.keras.layers.Dense(128, activation=tf.nn.relu, kernel_regularizer=reg))
+model.add(tf.compat.v1.keras.layers.Dense(64, activation=tf.nn.relu, kernel_regularizer=reg))
+model.add(tf.compat.v1.keras.layers.Dense(32, activation=tf.nn.relu, kernel_regularizer=reg))
+model.add(tf.compat.v1.keras.layers.Dense(16, activation=tf.nn.relu, kernel_regularizer=reg))
+model.add(tf.compat.v1.keras.layers.Dense(8, activation=tf.nn.relu, kernel_regularizer=reg))
+model.add(tf.compat.v1.keras.layers.Dense(4, activation=tf.nn.relu, kernel_regularizer=reg))
+model.add(tf.compat.v1.keras.layers.Dense(2, activation="softmax"))
 
-opt = keras.optimizers.Adam(lr=1e-4)
+opt = tf.compat.v1.keras.optimizers.Adam(lr=1e-4)
 model.compile(
     optimizer=opt, loss="sparse_categorical_crossentropy", metrics=["accuracy"]
 )
 
 callbacks = [
     # Save best model
-    keras.callbacks.ModelCheckpoint(
+    tf.compat.v1.keras.callbacks.ModelCheckpoint(
         filepath="models/nn_score/trained_model.hdf5",
         save_best_only=True,
         monitor="val_loss",
         save_weights_only=True,
     ),
-    keras.callbacks.TensorBoard(
+    tf.compat.v1.keras.callbacks.TensorBoard(
         log_dir="./logs/nn_score", write_graph=False, write_images=True
     ),
 ]

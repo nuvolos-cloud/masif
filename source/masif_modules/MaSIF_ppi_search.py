@@ -1,8 +1,11 @@
+import os
 import logging
 import tensorflow as tf
 import numpy as np
 
 logger = logging.getLogger(__name__)
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+tf.compat.v1.disable_v2_behavior()
 
 
 class MaSIF_ppi_search:

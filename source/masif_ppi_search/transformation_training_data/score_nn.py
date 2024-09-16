@@ -1,6 +1,10 @@
+import os
 import tensorflow as tf
 import numpy as np
 from tensorflow import keras
+
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+tf.compat.v1.disable_v2_behavior()
 
 
 """
@@ -19,43 +23,43 @@ class ScoreNN:
         np.random.seed(42)
         tf.compat.v1.random.set_random_seed(42)
 
-        reg = keras.regularizers.l2(l=0.0)
-        model = keras.models.Sequential()
+        reg = tf.compat.v1.keras.regularizers.l2(l=0.0)
+        model = tf.compat.v1.keras.models.Sequential()
 
-        model.add(keras.layers.Conv1D(filters=8, kernel_size=1, strides=1))
-        model.add(keras.layers.BatchNormalization())
-        model.add(keras.layers.ReLU())
+        model.add(tf.compat.v1.layers.conv1d(filters=8, kernel_size=1, strides=1))
+        model.add(tf.compat.v1.layers.batch_normalizatio)
+        model.add(tf.compat.v1.layers.ReLU())
         model.add(
-            keras.layers.Conv1D(
+            tf.compat.v1.layers.conv1d(
                 filters=16, kernel_size=1, strides=1, input_shape=(200, 3)
             )
         )
-        model.add(keras.layers.BatchNormalization())
-        model.add(keras.layers.ReLU())
-        model.add(keras.layers.Conv1D(filters=32, kernel_size=1, strides=1))
-        model.add(keras.layers.BatchNormalization())
-        model.add(keras.layers.ReLU())
-        model.add(keras.layers.Conv1D(filters=64, kernel_size=1, strides=1))
-        model.add(keras.layers.BatchNormalization())
-        model.add(keras.layers.ReLU())
-        model.add(keras.layers.Conv1D(filters=128, kernel_size=1, strides=1))
-        model.add(keras.layers.BatchNormalization())
-        model.add(keras.layers.ReLU())
-        model.add(keras.layers.Conv1D(filters=256, kernel_size=1, strides=1))
-        model.add(keras.layers.BatchNormalization())
-        model.add(keras.layers.ReLU())
-        model.add(keras.layers.GlobalAveragePooling1D())
+        model.add(tf.compat.v1.layers.batch_normalization())
+        model.add(tf.compat.v1.layers.ReLU())
+        model.add(tf.compat.v1.layers.conv1d(filters=32, kernel_size=1, strides=1))
+        model.add(tf.compat.v1.layers.batch_normalization())
+        model.add(tf.compat.v1.layers.ReLU())
+        model.add(tf.compat.v1.layers.conv1d(filters=64, kernel_size=1, strides=1))
+        model.add(tf.compat.v1.layers.batch_normalization())
+        model.add(tf.compat.v1.layers.ReLU())
+        model.add(tf.compat.v1.layers.conv1d(filters=128, kernel_size=1, strides=1))
+        model.add(tf.compat.v1.layers.batch_normalization())
+        model.add(tf.compat.v1.layers.ReLU())
+        model.add(tf.compat.v1.layers.conv1d(filters=256, kernel_size=1, strides=1))
+        model.add(tf.compat.v1.layers.batch_normalization())
+        model.add(tf.compat.v1.layers.ReLU())
+        model.add(tf.compat.v1.layers.global_average_pooling1d())
         model.add(
-            keras.layers.Dense(128, activation=tf.nn.relu, kernel_regularizer=reg)
+            tf.compat.v1.layers.dense(128, activation=tf.nn.relu, kernel_regularizer=reg)
         )
-        model.add(keras.layers.Dense(64, activation=tf.nn.relu, kernel_regularizer=reg))
-        model.add(keras.layers.Dense(32, activation=tf.nn.relu, kernel_regularizer=reg))
-        model.add(keras.layers.Dense(16, activation=tf.nn.relu, kernel_regularizer=reg))
-        model.add(keras.layers.Dense(8, activation=tf.nn.relu, kernel_regularizer=reg))
-        model.add(keras.layers.Dense(4, activation=tf.nn.relu, kernel_regularizer=reg))
-        model.add(keras.layers.Dense(2, activation="softmax"))
+        model.add(tf.compat.v1.layers.dense(64, activation=tf.nn.relu, kernel_regularizer=reg))
+        model.add(tf.compat.v1.layers.dense(32, activation=tf.nn.relu, kernel_regularizer=reg))
+        model.add(tf.compat.v1.layers.dense(16, activation=tf.nn.relu, kernel_regularizer=reg))
+        model.add(tf.compat.v1.layers.dense(8, activation=tf.nn.relu, kernel_regularizer=reg))
+        model.add(tf.compat.v1.layers.dense(4, activation=tf.nn.relu, kernel_regularizer=reg))
+        model.add(tf.compat.v1.layers.dense(2, activation="softmax"))
 
-        opt = keras.optimizers.Adam(lr=1e-4)
+        opt = tf.compat.v1.train.AdamOptimizer(learning_rate=1e-4)
         model.compile(
             optimizer=opt, loss="sparse_categorical_crossentropy", metrics=["accuracy"]
         )
@@ -68,14 +72,14 @@ class ScoreNN:
 
     def train_model(self, features, labels, n_negatives, n_positives):
         callbacks = [
-            keras.callbacks.ModelCheckpoint(
-                filepath="models/nn_score/{}.hdf5".format("trained_model"),
-                save_best_only=True,
-                monitor="val_loss",
-                save_weights_only=True,
+            tf.compat.v1.keras.callbacks.ModelCheckpoint(
+            filepath="models/nn_score/{}.hdf5".format("trained_model"),
+            save_best_only=True,
+            monitor="val_loss",
+            save_weights_only=True,
             ),
-            keras.callbacks.TensorBoard(
-                log_dir="./logs/nn_score", write_graph=False, write_images=True
+            tf.compat.v1.keras.callbacks.TensorBoard(
+            log_dir="./logs/nn_score", write_graph=False, write_images=True
             ),
         ]
         _ = self.model.fit(
