@@ -95,10 +95,14 @@ for count, ppi_pair_id in enumerate(ppi_list):
     out_desc_dir = os.path.join(params["desc_dir"], ppi_pair_id)
     if not os.path.exists(os.path.join(out_desc_dir, "p1_desc_straight.npy")):
         os.mkdir(out_desc_dir)
-    #    else:
-    #        # Ignore this one as it was already computed.
-    #        logger.info('Ignoring descriptor computation for {} as it was already computed'.format(ppi_pair_id))
-    #        continue
+    else:
+        # Ignore this one as it was already computed.
+        logger.info(
+            "Ignoring descriptor computation for {} as it was already computed".format(
+                ppi_pair_id
+            )
+        )
+        continue
 
     pdbid = ppi_pair_id.split("_")[0]
     chain1 = ppi_pair_id.split("_")[1]
